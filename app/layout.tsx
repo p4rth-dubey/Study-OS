@@ -20,7 +20,7 @@ const grotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: "Sunil Bhaiya PrepTrack — CBSE Study Tracker",
+    default: "StudyOS - CBSE Study Tracker",
     template: "%s · PrepTrack",
   },
   description:
