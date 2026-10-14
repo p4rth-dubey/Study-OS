@@ -2,9 +2,9 @@
 
 <img src="./app/icon.svg" width="120" height="120" alt="PrepTrack logo" />
 
-# PrepTrack
+# StudyOS
 
-### Sunil Bhaiya PrepTrack — the rebuilt, offline-first evolution of the original Sunil Bhaiya tracker.
+### StudyOS — the rebuilt, offline-first evolution of the original tracker.
 
 *Know exactly what to study next.*
 
@@ -14,7 +14,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwind-css&logoColor=black)](https://tailwindcss.com/)
 [![PWA](https://img.shields.io/badge/PWA-offline_first-6a4cf5?style=flat-square)](https://web.dev/progressive-web-apps/)
 
-[**✨ Try the live demo**](https://swastiksingh-dev.github.io/Sunil-Bhaiya-PrepTrack/) · [🐛 Report an issue](https://github.com/swastiksingh-dev/Sunil-Bhaiya-PrepTrack/issues)
+[**✨ Try the live demo**](https://github.com/p4rth-dubey/Study-OS) ·
 
 [Features](#features) · [Setup](#setup) · [Tests](#tests) · [Contributors](#contributors)
 
@@ -26,7 +26,7 @@
 
 ## What is this
 
-PrepTrack plans **backwards from your exam datesheet** and scopes every number
+StudyOS plans **backwards from your exam datesheet** and scopes every number
 to your **real exam syllabus**. For CBSE **Class 9 & 10 — Science, Maths, and
 Social Science** — each chapter breaks into finishable stages, and the tracker
 tells you the one honest number that matters: **stages per day**.
@@ -99,12 +99,6 @@ dev/prod builds are unaffected.
 - `public/pdfs/` — CBQ volumes (never precached, keeps installs light), `sw.js`
 - `tests/` — Playwright suites
 
-## For my teacher
-
-Sir, this is a small contribution from my side. I rebuilt your tracker as
-PrepTrack so that any student can use it for free. Thank you for teaching me.
-
-— Swastik
 
 ## Contributors
 
@@ -113,20 +107,15 @@ Thanks to everyone who makes PrepTrack better:
 <table>
 <tr>
 <td align="center" width="200">
-<a href="https://github.com/swastiksingh-dev"><img src="https://github.com/swastiksingh-dev.png" width="100" height="100" alt="Swastik Singh" loading="lazy" style="border-radius:50%" /><br/><b>Swastik Singh</b></a><br/>owner & maintainer
-</td>
-<td align="center" width="200">
-<a href="https://github.com/sunilbhaiya200"><img src="https://github.com/sunilbhaiya200.png" width="100" height="100" alt="sunilbhaiya200" loading="lazy" style="border-radius:50%" /><br/><b>sunilbhaiya200</b></a><br/>contributor
+<a href="https://github.com/p4rth-dubey"><img src="https://avatars.githubusercontent.com/u/342480038?s=60&v=4" width="100" height="100" alt="Parth" loading="lazy" style="border-radius:50%" /><br/><b>Parth Veer Dubey</b></a><br/>owner & maintainer
 </td>
 </tr>
 </table>
-
-<sub>See the full <a href="https://github.com/swastiksingh-dev/Sunil-Bhaiya-PrepTrack/graphs/contributors">contributors graph</a>.</sub>
 
 ---
 
 <div align="center">
 
-© PrepTrack by Sunil Bhaiya · Study data never leaves your device.
+© StudyOS by Parth Veer Dubey · Study data never leaves your device.
 
 </div>
