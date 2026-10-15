@@ -21,10 +21,10 @@ const grotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: {
     default: "StudyOS - CBSE Study Tracker",
-    template: "%s · PrepTrack",
+    template: "%s · StudyOS",
   },
   description:
-    "PrepTrack — the rebuilt, offline-first evolution of the original Sunil Bhaiya tracker: exam-syllabus pacing, stage tracking, insights, and question banks for CBSE Class 9 & 10.",
+    "StudyOS — offline-first evolution of the CBSE Study Tracker: exam-syllabus pacing, stage tracking, insights, and question banks for CBSE Class 9 & 10.",
   keywords: [
     "CBSE study tracker",
     "Class 10 preparation",

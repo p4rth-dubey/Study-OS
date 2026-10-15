@@ -4,7 +4,7 @@ import Landing from "../components/landing";
 export const metadata: Metadata = {
   title: "StudyOS - CBSE Study Tracker",
   description:
-    "PrepTrack — the rebuilt, offline-first evolution of the original Sunil Bhaiya tracker. Backward exam planning, stage tracking, insights, and question banks.",
+    "StudyOS — offline-first evolution of the CBSE Study Tracker. Backward exam planning, stage tracking, insights, and question banks.",
 };
 
 export default function Home() {

@@ -8,7 +8,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "StudyOS",
     short_name: "StudyOS",
-    description: "StudyOS — offline-first CBSE Class 9 & 10 preparation planner by Sunil Bhaiya",
+    description: "StudyOS — offline-first CBSE Class 9 & 10 preparation planner by Parth Veer Dubey",
     start_url: start,
     scope: SITE_BASE ? `${SITE_BASE}/` : "/",
     display: "standalone",
