@@ -4,7 +4,7 @@
 
 # StudyOS
 
-### StudyOS — the rebuilt, offline-first evolution of the original tracker.
+### StudyOS — the best, offline-first evolution of the CBSE study tracker.
 
 *Know exactly what to study next.*
 
@@ -18,9 +18,6 @@
 
 [Features](#features) · [Setup](#setup) · [Tests](#tests) · [Contributors](#contributors)
 
-<img src="./docs/about.gif" width="800" alt="PrepTrack launch film preview" />
-
-*PrepTrack launch film.*
 
 </div>
 
@@ -84,12 +81,6 @@ with zero console errors before it ships.
 
 </details>
 
-## Deploy
-
-Pushes to `main` auto-deploy to GitHub Pages via
-[`.github/workflows/pages.yml`](.github/workflows/pages.yml).
-The Pages build is a static export under `/Sunil-Bhaiya-PrepTrack` — local
-dev/prod builds are unaffected.
 
 ## Project layout
 
@@ -102,7 +93,7 @@ dev/prod builds are unaffected.
 
 ## Contributors
 
-Thanks to everyone who makes PrepTrack better:
+Thanks to everyone who makes StudyOS better:
 
 <table>
 <tr>
