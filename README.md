@@ -8,7 +8,7 @@
 
 *Know exactly what to study next.*
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-22c55e?style=for-the-badge&logo=google-chrome&logoColor=white)](https://swastiksingh-dev.github.io/Sunil-Bhaiya-PrepTrack/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-22c55e?style=for-the-badge&logo=google-chrome&logoColor=white)](https://study-os-p4rth1.vercel.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38BDF8?style=flat-square&logo=tailwind-css&logoColor=black)](https://tailwindcss.com/)
