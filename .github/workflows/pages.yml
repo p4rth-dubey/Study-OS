@@ -23,7 +23,7 @@ jobs:
       - run: npm run build
         env:
           DEPLOY_TARGET: pages
-          NEXT_PUBLIC_BASE_PATH: /Sunil-Bhaiya-PrepTrack
+          NEXT_PUBLIC_BASE_PATH: /Study-OS
       - run: touch out/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with:

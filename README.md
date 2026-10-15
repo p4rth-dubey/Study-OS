@@ -98,7 +98,10 @@ Thanks to everyone who makes StudyOS better:
 <table>
 <tr>
 <td align="center" width="200">
-<a href="https://github.com/p4rth-dubey"><img src="https://avatars.githubusercontent.com/u/342480038?s=60&v=4" width="100" height="100" alt="Parth" loading="lazy" style="border-radius:50%" /><br/><b>Parth Veer Dubey</b></a><br/>owner & maintainer
+<a href="https://github.com/p4rth-dubey"><img src="https://avatars.githubusercontent.com/u/342480038?s=60&v=4" width="100" height="100" alt="Parth" loading="lazy" style="border-radius:50%" /><br/><b>Parth Veer Dubey</b></a><br/>Owner & Maintainer
+</td>
+<td align="center" width="200">
+<a href="https://github.com/Tanmay-WebDev"><img src="https://avatars.githubusercontent.com/u/186921813?v=4" width="100" height="100" alt="Tanmay" loading="lazy" style="border-radius:50%" /><br/><b>Tanmay SIngh</b></a><br/>Contributor
 </td>
 </tr>
 </table>
