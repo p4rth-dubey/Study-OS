@@ -3,18 +3,20 @@
 "use client";
 
 import { useState } from "react";
-import { getSubjects, scopedChapterId } from "../lib/chapters";
+import { getSubjects, getSubjectsForProfile, scopedChapterId } from "../lib/chapters";
 
 export default function SyllabusChecklist({
   grade,
+  targetExam,
   value,
   onChange,
 }: {
   grade: number;
+  targetExam?: string;
   value: Record<string, string[]>;
   onChange: (next: Record<string, string[]>) => void;
 }) {
-  const subjects = getSubjects(grade);
+  const subjects = getSubjectsForProfile({ grade, targetExam });
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const toggle = (subjectId: string, scopedId: string) => {
@@ -54,7 +56,7 @@ export default function SyllabusChecklist({
                       </p>
                     )}
                     {g.chapters.map((ch) => {
-                      const sid = scopedChapterId(s.id, g.id, ch.id, grade);
+                      const sid = scopedChapterId(s.id, g.id, ch.id, targetExam || grade);
                       const checked = ids.includes(sid);
                       return (
                         <label

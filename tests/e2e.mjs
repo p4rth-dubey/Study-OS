@@ -165,7 +165,22 @@ for (const vp of VIEWPORTS) {
       await p.keyboard.press("Escape").catch(() => {});
     }
 
-    for (const route of ["/app/dashboard", "/app/chapters", "/app/insights", "/app/analysis", "/app/revision", "/app/goals", "/app/todo", "/app/resources", "/app/settings"]) {
+    for (const route of [
+      "/app/dashboard",
+      "/app/practice",
+      "/app/exams",
+      "/app/updates",
+      "/app/scholarships",
+      "/app/current-affairs",
+      "/app/chapters",
+      "/app/insights",
+      "/app/analysis",
+      "/app/revision",
+      "/app/goals",
+      "/app/todo",
+      "/app/resources",
+      "/app/settings",
+    ]) {
       await shot(route);
     }
 

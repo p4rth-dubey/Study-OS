@@ -1,4 +1,4 @@
-﻿/** Dashboard - greeting band, live stats, subject pace cards, Today's list.
+/** Dashboard - greeting band, live stats, subject pace cards, Today's list.
  * Entrances + count-ups via GSAP primitives; no scroll-jacking. */
 "use client";
 
@@ -246,13 +246,99 @@ export default function DashboardPage() {
       </Card>
       </Reveal>
 
+      {/* Multi-Exam Platform & AI Practice Lab */}
+      <Reveal>
+        <div className="mb-2.5 flex items-baseline justify-between">
+          <h2 className="text-[15px] font-semibold tracking-tight lg:text-[17px]">
+            Platform modules & AI Practice
+          </h2>
+          <span className="font-mono text-[12px] text-[#666]">03</span>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <Link href="/app/practice" className="block">
+            <SpotCard className="h-full rounded-[18px] bg-[#141414] p-4 ring-1 ring-white/[0.06] transition-all hover:bg-[#181818] hover:ring-white/[0.12]">
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#22c55e]/15 text-[#4ade80] font-bold text-[15px]">
+                  ⚡
+                </span>
+                <span className="font-mono text-[11px] text-[#4ade80]">CBT Engine</span>
+              </div>
+              <p className="mt-3 text-[15px] font-semibold text-white">AI Practice Lab</p>
+              <p className="mt-1 text-[12.5px] text-[#888] leading-relaxed">
+                Take timed CBT mock tests, authentic PYQ drills, and get step-by-step explanations.
+              </p>
+            </SpotCard>
+          </Link>
+
+          <Link href="/app/exams" className="block">
+            <SpotCard className="h-full rounded-[18px] bg-[#141414] p-4 ring-1 ring-white/[0.06] transition-all hover:bg-[#181818] hover:ring-white/[0.12]">
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#0099ff]/15 text-[#38bdf8] font-bold text-[15px]">
+                  🏛
+                </span>
+                <span className="font-mono text-[11px] text-[#38bdf8]">12 Exams</span>
+              </div>
+              <p className="mt-3 text-[15px] font-semibold text-white">Multi-Exam Hub</p>
+              <p className="mt-1 text-[12.5px] text-[#888] leading-relaxed">
+                Syllabi, marking schemes, and blueprints for CBSE 9-12, JEE, NEET, UPSC, and SSC.
+              </p>
+            </SpotCard>
+          </Link>
+
+          <Link href="/app/updates" className="block">
+            <SpotCard className="h-full rounded-[18px] bg-[#141414] p-4 ring-1 ring-white/[0.06] transition-all hover:bg-[#181818] hover:ring-white/[0.12]">
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f59e0b]/15 text-[#fbbf24] font-bold text-[15px]">
+                  📢
+                </span>
+                <span className="font-mono text-[11px] text-[#fbbf24]">Deadlines</span>
+              </div>
+              <p className="mt-3 text-[15px] font-semibold text-white">Exam Updates</p>
+              <p className="mt-1 text-[12.5px] text-[#888] leading-relaxed">
+                Admit cards, official circulars, datesheet announcements, and application deadlines.
+              </p>
+            </SpotCard>
+          </Link>
+
+          <Link href="/app/scholarships" className="block">
+            <SpotCard className="h-full rounded-[18px] bg-[#141414] p-4 ring-1 ring-white/[0.06] transition-all hover:bg-[#181818] hover:ring-white/[0.12]">
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[#a855f7]/15 text-[#c084fc] font-bold text-[15px]">
+                  🎓
+                </span>
+                <span className="font-mono text-[11px] text-[#c084fc]">NSP & DST</span>
+              </div>
+              <p className="mt-3 text-[15px] font-semibold text-white">Scholarship Finder</p>
+              <p className="mt-1 text-[12.5px] text-[#888] leading-relaxed">
+                Pre-Matric, Post-Matric, and STEM grants with direct government application links.
+              </p>
+            </SpotCard>
+          </Link>
+
+          <Link href="/app/current-affairs" className="block sm:col-span-2 lg:col-span-2">
+            <SpotCard className="h-full rounded-[18px] bg-[#141414] p-4 ring-1 ring-white/[0.06] transition-all hover:bg-[#181818] hover:ring-white/[0.12]">
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white font-bold text-[15px]">
+                  📰
+                </span>
+                <span className="font-mono text-[11px] text-[#aaa]">Daily Feed</span>
+              </div>
+              <p className="mt-3 text-[15px] font-semibold text-white">Current Affairs & Daily 5-Q Quiz</p>
+              <p className="mt-1 text-[12.5px] text-[#888] leading-relaxed">
+                Daily news digests tailored for competitive exams with instant mini-quiz drills and flashcards.
+              </p>
+            </SpotCard>
+          </Link>
+        </div>
+      </Reveal>
+
       {profile.grade === 10 && (
       <Reveal>
         <div className="mb-2.5 flex items-baseline justify-between">
           <h2 className="text-[15px] font-semibold tracking-tight lg:text-[17px]">
             CBSE news - Class 10
           </h2>
-          <span className="font-mono text-[12px] text-[#666]">03</span>
+          <span className="font-mono text-[12px] text-[#666]">04</span>
         </div>
         <Card>
           <div className="flex items-center gap-4">

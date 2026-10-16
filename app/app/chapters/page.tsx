@@ -6,7 +6,7 @@ import { Suspense, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTracker } from "../../../lib/storage";
 import { tapStage } from "../../../lib/celebrate";
-import { getSubjects, scopedChapterId } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile, scopedChapterId } from "../../../lib/chapters";
 import { getStageKeys, getStageLabel } from "../../../lib/stages";
 import { calculateSubjectPace } from "../../../lib/planner";
 import { Card, Dot, EmptyNotice, Modal, Pill, StageDot } from "../../../components/tracker-ui";
@@ -21,7 +21,7 @@ function ChaptersInner() {
   const [openId, setOpenId] = useState<string | null>(null);
   const [guardMsg, setGuardMsg] = useState(false);
 
-  const subjects = useMemo(() => (profile ? getSubjects(profile.grade) : []), [profile]);
+  const subjects = useMemo(() => (profile ? getSubjectsForProfile(profile) : []), [profile]);
   const [tab, setTab] = useState<string | null>(null);
   const activeId = tab ?? params.get("subject") ?? subjects[0]?.id ?? "";
   const subject = subjects.find((s) => s.id === activeId) ?? subjects[0];
@@ -30,7 +30,7 @@ function ChaptersInner() {
   if (!profile || !subject) return <EmptyNotice title="Nothing here yet" copy="Finish onboarding first." />;
 
   const pace = calculateSubjectPace(profile, subject);
-  const stageKeys = getStageKeys(profile.grade);
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
   const syllabus = profile.examSyllabus?.[subject.id] ?? [];
 
   const paceLine =
@@ -86,7 +86,7 @@ function ChaptersInner() {
                 <div className="space-y-2">
                   {g.chapters.map((ch) => {
                     const inExam = syllabus.includes(
-                      scopedChapterId(subject.id, g.id, ch.id, profile.grade),
+                      scopedChapterId(subject.id, g.id, ch.id, profile.targetExam || profile.grade),
                     );
                     const prog = profile.progress[`${subject.id}.${ch.id}`] ?? {};
                     const isOpen = openId === ch.id;
@@ -196,15 +196,15 @@ function FlatList({
   const store = useTracker();
   const { profile } = store;
   if (!profile) return null;
-  const subjects = getSubjects(profile.grade);
+  const subjects = getSubjectsForProfile(profile);
   const subject = subjects.find((s) => s.id === subjectId)!;
-  const stageKeys = getStageKeys(profile.grade);
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
   const syllabus = profile.examSyllabus?.[subjectId] ?? [];
 
   const rows: { group: string | null; chNo: number; chName: string; chId: string; sk: string; st: string }[] = [];
   for (const g of subject.groups) {
     for (const ch of g.chapters) {
-      if (!syllabus.includes(scopedChapterId(subjectId, g.id, ch.id, profile.grade))) continue;
+      if (!syllabus.includes(scopedChapterId(subjectId, g.id, ch.id, profile.targetExam || profile.grade))) continue;
       const prog = profile.progress[`${subjectId}.${ch.id}`] ?? {};
       for (const sk of stageKeys) {
         const st = (prog[sk] as string) ?? "none";

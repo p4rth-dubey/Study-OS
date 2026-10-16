@@ -51,7 +51,7 @@ export interface FocusItem extends InSyllabusChapter {
 export function calculateSubjectPace(profile: Profile, subject: Subject): SubjectPace {
   const today = new Date(todayString());
   const syllabus = profile.examSyllabus?.[subject.id] ?? [];
-  const stageKeys = getStageKeys(profile.grade);
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
 
   const allBook: InSyllabusChapter[] = [];
   for (const g of subject.groups) {
@@ -62,7 +62,7 @@ export function calculateSubjectPace(profile: Profile, subject: Subject): Subjec
         name: ch.name,
         groupId: g.id,
         groupName: g.name,
-        scopedId: scopedChapterId(subject.id, g.id, ch.id, profile.grade),
+        scopedId: scopedChapterId(subject.id, g.id, ch.id, profile.targetExam || profile.grade),
       });
     }
   }
@@ -87,7 +87,7 @@ export function calculateSubjectPace(profile: Profile, subject: Subject): Subjec
   const completionPercentage =
     totalStages > 0 ? Math.round((completedStages / totalStages) * 100) : 0;
 
-  const examDateStr = profile.datesheet?.[subject.examKey] ?? null;
+  const examDateStr = profile.datesheet?.[subject.examKey] ?? profile.datesheet?.[subject.id] ?? null;
   let daysLeft: number | null = null;
   let isPastExam = false;
   if (examDateStr) {
@@ -162,7 +162,7 @@ export function getOrderedSubjectPaces(profile: Profile, subjects: Subject[]): S
 /** First 3 pending stages walking the nearest-exam-first subject order. */
 export function getTodaysFocus(profile: Profile, subjects: Subject[]): FocusItem[] {
   const items: FocusItem[] = [];
-  const stageKeys = getStageKeys(profile.grade);
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
   for (const pace of getOrderedSubjectPaces(profile, subjects)) {
     if (pace.remainingStages === 0) continue;
     for (const ch of pace.inSyllabusChapters) {

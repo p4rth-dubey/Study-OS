@@ -38,15 +38,18 @@ tells you the one honest number that matters: **stages per day**.
 
 | Area | What you get |
 | --- | --- |
-| 🏠 Dashboard | Greeting band, live stats, per-subject pace cards, Today's to-do, Class 10 CBSE news |
-| 📖 Chapters | Full NCERT lists — 5 stages/chapter (Class 10), 3 (Class 9); tap dots Not started → In progress → Done; out-of-syllabus guard |
+| 🏠 Dashboard | Greeting band, live stats, per-subject pace cards, Today's to-do, multi-exam quick launch, Class 10 CBSE news |
+| ⚡ AI Practice Lab | Timed CBT Mock Tests, PYQ drills, question palette, autosave recovery, detailed scoring & explanations |
+| 🏛 Multi-Exam Hub | 12 supported exams across School (CBSE 9-12), Engineering (JEE/GATE), Medical (NEET), Govt (UPSC/SSC/Bank), Entrance (CUET) |
+| 📢 Exam Updates | Verified official exam circulars, admit cards, datesheets, application windows & countdowns |
+| 🎓 Scholarship Finder | Verified Central & State merit scholarships (NMMSS, INSPIRE, AICTE Pragati, PM-YASASVI) with direct portal links |
+| 📰 Current Affairs | Daily exam-tailored news digests, 5-question daily drills with instant feedback, and revision flashcards |
+| 📖 Chapters & Stages | Full NCERT lists — 5 stages/chapter (Class 10), 3 (Class 9); tap dots Not started → In progress → Done |
 | 📊 Insights & Analysis | 7-day activity, completion rings, pace-vs-target, weakest-stage callout, finish forecast, heatmap |
-| 🔁 Revision queue | Stale stages resurface automatically |
+| 🔁 Revision queue | Stale stages resurface automatically for spaced repetition |
 | 🎯 Goals & ✅ To-Do | Weekly goal stepper with fanfare, per-profile task lists |
-| 📄 Resources | 8 Competency (CBQ) PDF volumes on-device + official CBSE PYQ portal |
+| 📄 Resources Library | 8 Competency (CBQ) PDF volumes on-device + official syllabi, NCERT digital books, and PYQ portals |
 | ⚙️ Settings | Syllabus editor, datesheet, backup/restore, profiles, sounds, diagnostics |
-
-## Setup
 
 ## Setup
 
@@ -57,10 +60,12 @@ tells you the one honest number that matters: **stages per day**.
 npm install
 
 # Development — http://localhost:3000
-# (same-Wi-Fi phone: http://<laptop-ip>:3000)
 npm run dev
 
-# Production — http://localhost:3111
+# Unit & Engine Verification Tests
+npm run test:unit
+
+# Production Build
 npm run build
 npm run start -- --port 3111
 ```
@@ -73,22 +78,24 @@ npm run start -- --port 3111
 <summary><b>How we verify</b></summary>
 
 ```bash
-node tests/e2e.mjs   # 100+ assertions: every route × mobile / tablet / desktop
+# Unit verification: exam registry, marking schemes, negative scoring, question validation
+npm run test:unit
+
+# Playwright E2E verification across mobile, tablet, and desktop viewports
+node tests/e2e.mjs
 ```
 
-Every push is type-checked (`tsc`), production-built, and Playwright-tested
-with zero console errors before it ships.
+Every push is type-checked (`tsc`), unit tested, production-built, and Playwright-tested with zero console errors before it ships.
 
 </details>
 
-
 ## Project layout
 
-- `app/` — routes (`/` landing, `/app/*` tracker), sitemap, manifest, icon
-- `components/` — landing, tracker UI atoms, hero scene/video, PWA registration
-- `lib/` — `storage` (localStorage `cbse_tracker_v1`), chapters, stages, planner, insights, celebrate, motion, site
+- `app/` — routes (`/` landing, `/app/*` tracker, practice, exams, updates, scholarships, current-affairs), API route handlers (`/api/practice/*`)
+- `components/` — landing, tracker UI atoms, hero scene/video, PWA registration, profile switcher
+- `lib/` — `storage` (`cbse_tracker_v1`), `exams` registry, `practice` engine & question bank, `updates`, `scholarships`, `current-affairs`, chapters, stages, planner, insights
 - `public/pdfs/` — CBQ volumes (never precached, keeps installs light), `sw.js`
-- `tests/` — Playwright suites
+- `tests/` — Unit suites (`unit-exams-practice.mjs`) & Playwright E2E suites (`e2e.mjs`)
 
 
 ## Contributors

@@ -1,5 +1,5 @@
 /** Preparation stage definitions — the vocabulary of the tracker.
- * Single interface: stage keys per grade + subject-aware labels. */
+ * Single interface: stage keys per grade/exam + subject-aware labels. */
 
 export type StageKey =
   | "theory"
@@ -12,13 +12,27 @@ export type StageKey =
 export type Grade = 9 | 10;
 export type StageState = "none" | "progress" | "done";
 
-const STAGE_SETS: Record<Grade, StageKey[]> = {
-  9: ["theory", "ncert", "revision"],
-  10: ["theory", "ncert", "exemplar", "pyq", "cbq"],
+const STAGE_SETS: Record<string, StageKey[]> = {
+  "9": ["theory", "ncert", "revision"],
+  "10": ["theory", "ncert", "exemplar", "pyq", "cbq"],
+  "cbse-9": ["theory", "ncert", "revision"],
+  "cbse-10": ["theory", "ncert", "exemplar", "pyq", "cbq"],
+  "cbse-11": ["theory", "ncert", "exemplar", "pyq", "cbq"],
+  "cbse-12": ["theory", "ncert", "exemplar", "pyq", "cbq"],
+  "jee-main": ["theory", "ncert", "pyq", "revision"],
+  "jee-advanced": ["theory", "ncert", "pyq", "revision"],
+  "neet-ug": ["theory", "ncert", "pyq", "revision"],
+  "upsc-cse": ["theory", "pyq", "revision"],
+  "ssc-cgl": ["theory", "pyq", "revision"],
+  "banking-po": ["theory", "pyq", "revision"],
 };
 
 const LABELS_BY_SUBJECT: Record<string, Partial<Record<StageKey, string>>> = {
-  maths: { theory: "Concepts and Formulae" },
+  maths: { theory: "Concepts and Formulae", ncert: "NCERT & Practice" },
+  physics: { theory: "Core Concepts", ncert: "Standard Problems", pyq: "PYQs (10-Yr)" },
+  chemistry: { theory: "NCERT Theory", ncert: "Reactions & Equations", pyq: "PYQs (10-Yr)" },
+  biology: { theory: "NCERT Line-by-Line", ncert: "Diagrams & Exemplar", pyq: "NEET PYQs" },
+  "gs-paper-1": { theory: "Standard Books & Notes", pyq: "UPSC 25-Year PYQs", revision: "Current Affairs Linking" },
   default: {
     theory: "Theory Read",
     ncert: "NCERT Questions",
@@ -29,9 +43,10 @@ const LABELS_BY_SUBJECT: Record<string, Partial<Record<StageKey, string>>> = {
   },
 };
 
-/** Stage keys in exact display order for a grade. */
-export function getStageKeys(grade: number): StageKey[] {
-  return STAGE_SETS[grade as Grade] ?? STAGE_SETS[10];
+/** Stage keys in exact display order for a grade or target exam. */
+export function getStageKeys(gradeOrExam: number | string): StageKey[] {
+  const key = String(gradeOrExam);
+  return STAGE_SETS[key] ?? (Number(gradeOrExam) === 9 ? STAGE_SETS["9"] : STAGE_SETS["10"]);
 }
 
 /** Human label. Call as getStageLabel("maths", "theory") or getStageLabel("theory"). */

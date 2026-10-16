@@ -5,14 +5,24 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { getStageKeys, type StageKey, type StageState } from "./stages";
-import { getSubjects, scopedChapterId } from "./chapters";
+import { getSubjects, getSubjectsForProfile, scopedChapterId } from "./chapters";
 
 export const STORAGE_KEY = "cbse_tracker_v1";
 
 export interface Datesheet {
-  science: string;
-  maths: string;
-  sst: string;
+  science?: string;
+  maths?: string;
+  sst?: string;
+  physics?: string;
+  chemistry?: string;
+  biology?: string;
+  "gs-paper-1"?: string;
+  "csat-paper-2"?: string;
+  quant?: string;
+  reasoning?: string;
+  english?: string;
+  awareness?: string;
+  [key: string]: string | undefined;
 }
 
 export type ChapterProgress = Record<string, StageState | string | undefined> & {
@@ -36,6 +46,7 @@ export interface Profile {
   id: string;
   name: string;
   grade: number;
+  targetExam?: string;
   datesheet: Datesheet;
   examSyllabus: Record<string, string[]>;
   progress: Record<string, ChapterProgress>;
@@ -64,12 +75,13 @@ export function todayString(): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
-function defaultSyllabus(grade: number): Record<string, string[]> {
+export function defaultSyllabus(gradeOrExam: number | string): Record<string, string[]> {
   const syllabus: Record<string, string[]> = {};
-  for (const sub of getSubjects(grade)) {
+  const prof = typeof gradeOrExam === "number" ? { grade: gradeOrExam } : { targetExam: gradeOrExam, grade: 10 };
+  for (const sub of getSubjectsForProfile(prof)) {
     const ids: string[] = [];
     for (const g of sub.groups)
-      for (const ch of g.chapters) ids.push(scopedChapterId(sub.id, g.id, ch.id, grade));
+      for (const ch of g.chapters) ids.push(scopedChapterId(sub.id, g.id, ch.id, gradeOrExam));
     syllabus[sub.id] = ids;
   }
   return syllabus;
@@ -176,6 +188,7 @@ const nid = () => `prof_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
 export interface Draft {
   name: string;
   grade: number;
+  targetExam?: string;
   datesheet: Datesheet;
   examSyllabus: Record<string, string[]> | null;
 }
@@ -190,6 +203,7 @@ export interface Store {
   deleteProfile: (id: string) => void;
   updateDatesheet: (datesheet: Datesheet) => void;
   renameProfile: (name: string) => void;
+  updateTargetExam: (targetExam: string) => void;
   updateSyllabus: (syllabus: Record<string, string[]>) => void;
   cycleStage: (subjectId: string, chapterId: string, stageKey: StageKey) => void;
   touchStage: (subjectId: string, chapterId: string, stageKey: StageKey) => void;
@@ -243,12 +257,14 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
 
       createProfile: (d) => {
         const next = { ...state, profiles: [...state.profiles] };
+        const targetExam = d.targetExam || (Number(d.grade) === 9 ? "cbse-9" : "cbse-10");
         const p: Profile = {
           id: nid(),
           name: d.name || "Student",
           grade: Number(d.grade) || 10,
+          targetExam,
           datesheet: d.datesheet,
-          examSyllabus: d.examSyllabus ?? defaultSyllabus(d.grade),
+          examSyllabus: d.examSyllabus ?? defaultSyllabus(targetExam),
           progress: {},
           streak: { count: 1, lastActive: todayString() },
         };
@@ -290,6 +306,17 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
         commit({ ...state, profiles });
       },
 
+      updateTargetExam: (targetExam) => {
+        if (!profile) return;
+        const newSyllabus = defaultSyllabus(targetExam);
+        const profiles = state.profiles.map((p) =>
+          p.id === profile.id
+            ? { ...p, targetExam, examSyllabus: newSyllabus }
+            : p,
+        );
+        commit({ ...state, profiles });
+      },
+
       updateSyllabus: (syllabus) => {
         if (!profile) return;
         const profiles = state.profiles.map((p) =>
@@ -303,7 +330,7 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
       cycleStage: (subjectId, chapterId, stageKey) => {
         if (!profile) return;
         const key = `${subjectId}.${chapterId}`;
-        const keys = getStageKeys(profile.grade);
+        const keys = getStageKeys(profile.targetExam || profile.grade);
         const cur: ChapterProgress = { ...(profile.progress[key] ?? {}) };
         for (const sk of keys) if (!(sk in cur)) cur[sk] = "none";
         const c = (cur[stageKey] as StageState) ?? "none";
@@ -397,7 +424,7 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
 
       backfill: (subjectId, chapterIds, done) => {
         if (!profile) return;
-        const keys = getStageKeys(profile.grade);
+        const keys = getStageKeys(profile.targetExam || profile.grade);
         const progress = { ...profile.progress };
         for (const chId of chapterIds) {
           const cur: ChapterProgress = { ...(progress[`${subjectId}.${chId}`] ?? {}) };
