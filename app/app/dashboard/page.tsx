@@ -4,7 +4,9 @@
 
 import Link from "next/link";
 import { useTracker } from "../../../lib/storage";
-import { getSubjects } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
+import { getStageKeys } from "../../../lib/stages";
+import { EXAM_REGISTRY } from "../../../lib/exams/registry";
 import { getOrderedSubjectPaces } from "../../../lib/planner";
 import { calculateSubjectAnalytics } from "../../../lib/insights";
 import { CountUp, Reveal } from "../../../lib/motion";
@@ -28,12 +30,13 @@ export default function DashboardPage() {
       />
     );
 
-  const subjects = getSubjects(profile.grade);
+  const subjects = getSubjectsForProfile(profile);
   const paces = getOrderedSubjectPaces(profile, subjects);
   const analyticsById = Object.fromEntries(
     subjects.map((s) => [s.id, calculateSubjectAnalytics(profile, s)]),
   );
-  const stageCount = profile.grade === 9 ? 3 : 5;
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
+  const stageCount = stageKeys.length;
 
   const totalStages = paces.reduce((n, p) => n + p.totalStages, 0);
   const doneStages = paces.reduce((n, p) => n + p.completedStages, 0);
@@ -86,9 +89,15 @@ export default function DashboardPage() {
           <div className="relative flex flex-wrap items-center gap-4 sm:gap-5 lg:gap-8">
             <CircleChart pct={overall} size={88} sub="complete" />
             <div className="min-w-[180px] flex-1">
-              <p className="font-mono text-[11px] tracking-[0.08em] text-[#777] uppercase">
-                {greeting} · Class {profile.grade}
-              </p>
+              {(() => {
+                const examConfig = profile.targetExam ? EXAM_REGISTRY[profile.targetExam] : null;
+                const streamTitle = examConfig?.shortName ?? `Class ${profile.grade}`;
+                return (
+                  <p className="font-mono text-[11px] tracking-[0.08em] text-[#777] uppercase">
+                    {greeting} · {streamTitle}
+                  </p>
+                );
+              })()}
               <h1 className="display-tight tnum mt-1 text-[26px] break-words sm:text-[38px]">
                 {profile.name}&apos;s prep is <CountUp to={overall} suffix="%" /> there.
               </h1>
@@ -106,11 +115,27 @@ export default function DashboardPage() {
                 </span>
               </div>
             </div>
-            <Link href="/app/chapters" className="relative w-full sm:w-auto">
-              <span className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-medium text-black transition-transform hover:scale-[1.03] active:scale-[0.98] sm:w-auto">
-                Continue studying
-              </span>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+              {(profile.targetExam === "jee-main" || profile.targetExam === "jee-advanced") && (
+                <Link href="/app/jee" className="relative w-full sm:w-auto">
+                  <span className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#0284c7] px-5 text-sm font-semibold text-white transition-transform hover:scale-[1.03] active:scale-[0.98] sm:w-auto">
+                    JEE Command Center →
+                  </span>
+                </Link>
+              )}
+              {profile.targetExam === "neet-ug" && (
+                <Link href="/app/neet" className="relative w-full sm:w-auto">
+                  <span className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[#10b981] px-5 text-sm font-semibold text-white transition-transform hover:scale-[1.03] active:scale-[0.98] sm:w-auto">
+                    NEET Command Center →
+                  </span>
+                </Link>
+              )}
+              <Link href="/app/chapters" className="relative w-full sm:w-auto">
+                <span className="inline-flex h-12 w-full items-center justify-center rounded-full bg-white px-6 text-sm font-medium text-black transition-transform hover:scale-[1.03] active:scale-[0.98] sm:w-auto">
+                  Continue studying
+                </span>
+              </Link>
+            </div>
           </div>
         </section>
       </Reveal>

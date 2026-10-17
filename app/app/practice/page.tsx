@@ -2,17 +2,20 @@
  * Allows students to configure, launch, and review high-yield practice drills and full CBT mock tests. */
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getAllExams, getExamById } from "../../../lib/exams/registry";
 import { loadActiveSession, loadTestHistory } from "../../../lib/practice/storage";
+import { useTracker } from "../../../lib/storage";
 import type { PracticeConfig, PracticeMode, TestPaper, TestAttemptState, TestResult } from "../../../lib/practice/types";
 import { Card, CircleChart, GhostButton, Pill, PrimaryButton, SpotCard, StatusTag } from "../../../components/tracker-ui";
 import { Reveal } from "../../../lib/motion";
 
-export default function PracticeHubPage() {
+function PracticeHubPageInner() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { profile } = useTracker();
   const exams = getAllExams();
 
   const [selectedExamId, setSelectedExamId] = useState<string>("cbse-10");
@@ -22,6 +25,15 @@ export default function PracticeHubPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [activeSession, setActiveSession] = useState<{ paper: TestPaper; attempt: TestAttemptState } | null>(null);
   const [history, setHistory] = useState<TestResult[]>([]);
+
+  useEffect(() => {
+    const qExam = searchParams.get("exam");
+    if (qExam) {
+      setSelectedExamId(qExam);
+    } else if (profile?.targetExam) {
+      setSelectedExamId(profile.targetExam);
+    }
+  }, [searchParams, profile?.targetExam]);
 
   useEffect(() => {
     setActiveSession(loadActiveSession());
@@ -400,5 +412,13 @@ export default function PracticeHubPage() {
         </div>
       </Reveal>
     </div>
+  );
+}
+
+export default function PracticeHubPage() {
+  return (
+    <Suspense>
+      <PracticeHubPageInner />
+    </Suspense>
   );
 }

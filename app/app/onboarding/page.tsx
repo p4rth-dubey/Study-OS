@@ -1,13 +1,14 @@
 /** Onboarding — 4 steps in landing style: gradient header, stepped rail,
  * spotlight panel, GSAP step transitions, Lenis smooth scroll.
- * Logic unchanged from spec: details → datesheet → syllabus → backfill. */
+ * Supports multi-exam personalization: School (CBSE 9-10), Engineering (JEE Main/Adv),
+ * Medical (NEET-UG), and Government examinations (UPSC, SSC, Banking). */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
 import { useTracker, type Datesheet } from "../../../lib/storage";
-import { getSubjects, scopedChapterId } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile, scopedChapterId } from "../../../lib/chapters";
 import { Card, DateField, Field, GhostButton, PrimaryButton, inputCls } from "../../../components/tracker-ui";
 import SyllabusChecklist from "../../../components/syllabus-checklist";
 import { SmoothScroll, reducedMotion } from "../../../lib/motion";
@@ -15,16 +16,20 @@ import { celebrate } from "../../../lib/celebrate";
 import { BrandMark } from "../../../components/site-header";
 
 const STEPS = [
-  { n: "01", title: "Details", copy: "Who's studying, which class." },
+  { n: "01", title: "Details", copy: "Who's studying & target goal." },
   { n: "02", title: "Datesheet", copy: "Pace plans backwards from these." },
   { n: "03", title: "Syllabus", copy: "Only your real exam chapters." },
   { n: "04", title: "Backfill", copy: "Credit work already done." },
 ];
 
-const SUBJECT_META = [
-  { key: "science", label: "Science", dot: "bg-[#6a4cf5]" },
-  { key: "maths", label: "Mathematics", dot: "bg-[#d44df0]" },
-  { key: "sst", label: "Social Science", dot: "bg-[#ff7a3d]" },
+export const EXAM_GOALS = [
+  { id: "cbse-10", grade: 10, title: "CBSE Class 10", subtitle: "Science, Maths, Social Science", tag: "School Board" },
+  { id: "cbse-9", grade: 9, title: "CBSE Class 9", subtitle: "Science, Maths, Social Science", tag: "School Prep" },
+  { id: "jee-main", grade: 12, title: "JEE Main / Advanced", subtitle: "Physics, Chemistry, Mathematics", tag: "Engineering" },
+  { id: "neet-ug", grade: 12, title: "NEET-UG", subtitle: "Biology, Physics, Chemistry", tag: "Medical" },
+  { id: "upsc-cse", grade: 12, title: "UPSC Civil Services", subtitle: "GS Paper 1, CSAT & Current Affairs", tag: "Civil Services" },
+  { id: "ssc-cgl", grade: 12, title: "SSC CGL", subtitle: "Quant, Reasoning, English, General Awareness", tag: "Staff Selection" },
+  { id: "banking-po", grade: 12, title: "Banking PO (SBI/IBPS)", subtitle: "Quantitative Aptitude, Reasoning, English", tag: "Banking" },
 ] as const;
 
 function daysUntil(iso: string): number | null {
@@ -41,6 +46,7 @@ export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
+  const [targetExam, setTargetExam] = useState<string>("cbse-10");
   const [grade, setGrade] = useState(10);
   const [datesheet, setDatesheet] = useState<Datesheet>({ science: "", maths: "", sst: "" });
   const [syllabus, setSyllabus] = useState<Record<string, string[]> | null>(null);
@@ -61,11 +67,18 @@ export default function OnboardingPage() {
 
   if (!store.ready) return null;
 
+  const currentSubjects = getSubjectsForProfile({ grade, targetExam });
+
+  const handleSelectGoal = (id: string, g: number) => {
+    setTargetExam(id);
+    setGrade(g);
+  };
+
   const startSyllabus = () => {
     const full: Record<string, string[]> = {};
-    for (const s of getSubjects(grade)) {
+    for (const s of currentSubjects) {
       full[s.id] = s.groups.flatMap((g) =>
-        g.chapters.map((ch) => scopedChapterId(s.id, g.id, ch.id, grade)),
+        g.chapters.map((ch) => scopedChapterId(s.id, g.id, ch.id, targetExam || grade)),
       );
     }
     setSyllabus(full);
@@ -73,7 +86,13 @@ export default function OnboardingPage() {
   };
 
   const finish = (withBackfill: boolean) => {
-    store.createProfile({ name: name.trim() || "Student", grade, datesheet, examSyllabus: syllabus });
+    store.createProfile({
+      name: name.trim() || "Student",
+      grade,
+      targetExam,
+      datesheet,
+      examSyllabus: syllabus,
+    });
     if (withBackfill) {
       const bySubject: Record<string, string[]> = {};
       for (const [key, v] of Object.entries(backfilled)) {
@@ -87,9 +106,9 @@ export default function OnboardingPage() {
     router.replace("/app/dashboard");
   };
 
-  const datesSet = (["science", "maths", "sst"] as const).filter((k) => datesheet[k]).length;
+  const datesSet = currentSubjects.filter((s) => datesheet[s.examKey || s.id]).length;
   const selectedCount = syllabus ? Object.values(syllabus).reduce((n, a) => n + a.length, 0) : 0;
-  const totalCount = getSubjects(grade).reduce(
+  const totalCount = currentSubjects.reduce(
     (n, s) => n + s.groups.reduce((m, g) => m + g.chapters.length, 0),
     0,
   );
@@ -108,13 +127,13 @@ export default function OnboardingPage() {
             <p className="inline-flex items-center gap-2 rounded-full bg-white/[0.06] px-4 py-2 text-xs font-medium tracking-wide text-[#ccc] ring-1 ring-white/10">
               <span aria-hidden className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#22c55e]" />
               <BrandMark size={18} />
-              Get started · takes 2 minutes
+              Personalized setup · takes 2 minutes
             </p>
             <h1 className="display-tight mx-auto mt-5 max-w-2xl text-[40px] sm:text-[56px]">
               Set up your prep.
             </h1>
             <p className="mx-auto mt-3 max-w-xl text-[16px] text-[#999]">
-              Four quick steps. Your dates, your syllabus, your head start — then a daily plan.
+              Four quick steps. Choose your exam, syllabus, and target dates — your whole dashboard adapts instantly.
             </p>
           </div>
 
@@ -158,10 +177,9 @@ export default function OnboardingPage() {
                 className="mt-4 rounded-[20px] p-5"
                 style={{ background: "linear-gradient(150deg, #6a4cf5, #d44df0 60%, #ff5577)" }}
               >
-                <p className="text-[15px] font-semibold tracking-tight">Pace, not panic.</p>
+                <p className="text-[15px] font-semibold tracking-tight">Tailored Experience</p>
                 <p className="mt-1 text-[14px] leading-relaxed opacity-90">
-                  The tracker converts “exam in 40 days, 60 stages left” into one honest number:
-                  stages per day.
+                  Whether you are preparing for Class 10 Boards, cracking JEE, or clearing NEET, your navigation, checklist, and practice tests match your goal.
                 </p>
               </div>
             </aside>
@@ -207,7 +225,7 @@ export default function OnboardingPage() {
               <div ref={bodyRef} key={step} className="relative mt-6">
                 {step === 1 && (
                   <form
-                    className="space-y-4"
+                    className="space-y-5"
                     onSubmit={(e) => {
                       e.preventDefault();
                       setStep(2);
@@ -233,37 +251,45 @@ export default function OnboardingPage() {
                         />
                       </div>
                     </Field>
-                    <Field label="Class">
-                      <div role="radiogroup" aria-label="Class" className="grid grid-cols-2 gap-2">
-                        {[
-                          { v: 10, t: "Class 10", s: "5 stages / chapter" },
-                          { v: 9, t: "Class 9", s: "3 stages / chapter" },
-                        ].map((g) => {
-                          const active = grade === g.v;
+
+                    <Field label="Target Examination / Goal">
+                      <div role="radiogroup" aria-label="Target Examination" className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {EXAM_GOALS.map((opt) => {
+                          const active = targetExam === opt.id;
                           return (
                             <button
-                              key={g.v}
+                              key={opt.id}
                               type="button"
                               role="radio"
                               aria-checked={active}
-                              onClick={() => setGrade(g.v)}
-                              className={`min-h-[68px] rounded-[14px] px-4 py-3 text-left ring-1 transition-all active:scale-[0.98] ${
+                              onClick={() => handleSelectGoal(opt.id, opt.grade)}
+                              className={`flex flex-col justify-between rounded-[14px] p-3.5 text-left ring-1 transition-all active:scale-[0.98] ${
                                 active
-                                  ? "bg-white text-black ring-white"
+                                  ? "bg-white text-black ring-white shadow-lg"
                                   : "bg-[#1c1c1c] ring-white/10 hover:bg-[#242424]"
                               }`}
                             >
-                              <span className="block text-[15px] font-semibold">{g.t}</span>
-                              <span className={`mt-0.5 block text-[12.5px] ${active ? "text-black/60" : "text-[#888]"}`}>
-                                {g.s}
+                              <div className="flex items-start justify-between gap-2">
+                                <span className="font-semibold text-[14.5px]">{opt.title}</span>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                                    active ? "bg-black/10 text-black" : "bg-white/10 text-[#bbb]"
+                                  }`}
+                                >
+                                  {opt.tag}
+                                </span>
+                              </div>
+                              <span className={`mt-1 text-[12px] leading-relaxed ${active ? "text-black/70" : "text-[#888]"}`}>
+                                {opt.subtitle}
                               </span>
                             </button>
                           );
                         })}
                       </div>
                     </Field>
-                    <div className="flex flex-wrap gap-1.5">
-                      {["Offline-first", "No account", "Free forever"].map((t) => (
+
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {["Offline-first", "No password needed", "100% Free", "Adaptive Curriculum"].map((t) => (
                         <span key={t} className="rounded-full bg-white/[0.06] px-3 py-1.5 text-[12px] font-medium text-[#bbb] ring-1 ring-white/10">
                           {t}
                         </span>
@@ -284,19 +310,25 @@ export default function OnboardingPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <h2 className="text-[22px] font-semibold tracking-tight">Exam datesheet</h2>
-                        <p className="-mt-0.5 text-[14px] text-[#999]">Pace is planned backwards from these dates.</p>
+                        <p className="-mt-0.5 text-[14px] text-[#999]">
+                          Pace is planned backwards from these dates for each subject.
+                        </p>
                       </div>
                       <span className="tnum shrink-0 rounded-full bg-white/[0.07] px-3 py-1.5 font-mono text-[12px] font-bold ring-1 ring-white/10">
-                        {datesSet}/3 set
+                        {datesSet}/{currentSubjects.length} set
                       </span>
                     </div>
-                    {SUBJECT_META.map((m) => {
-                      const left = daysUntil(datesheet[m.key]);
+
+                    {currentSubjects.map((sub, idx) => {
+                      const key = sub.examKey || sub.id;
+                      const left = daysUntil(datesheet[key] ?? "");
+                      const dotColors = ["bg-[#6a4cf5]", "bg-[#d44df0]", "bg-[#ff7a3d]", "bg-[#10b981]", "bg-[#0284c7]"];
+                      const dot = dotColors[idx % dotColors.length];
                       return (
-                        <div key={m.key} className="rounded-[14px] bg-[#1c1c1c]/60 p-3 ring-1 ring-white/[0.05]">
+                        <div key={key} className="rounded-[14px] bg-[#1c1c1c]/60 p-3 ring-1 ring-white/[0.05]">
                           <div className="mb-1 flex items-center gap-2 px-1">
-                            <span aria-hidden className={`h-2 w-2 rounded-full ${m.dot}`} />
-                            <span className="text-[13px] font-semibold">{m.label}</span>
+                            <span aria-hidden className={`h-2 w-2 rounded-full ${dot}`} />
+                            <span className="text-[13px] font-semibold">{sub.name}</span>
                             {left !== null && (
                               <span className={`ml-auto text-[12px] font-medium ${left < 0 ? "text-[#f87171]" : "text-[#4ade80]"}`}>
                                 {left < 0 ? `${Math.abs(left)}d ago — update?` : left === 0 ? "exam today?!" : `in ${left}d`}
@@ -304,14 +336,15 @@ export default function OnboardingPage() {
                             )}
                           </div>
                           <DateField
-                            label={`${m.label} exam date`}
-                            value={datesheet[m.key]}
+                            label={`${sub.name} exam date`}
+                            value={datesheet[key]}
                             required
-                            onChange={(v) => setDatesheet((d) => ({ ...d, [m.key]: v }))}
+                            onChange={(v) => setDatesheet((d) => ({ ...d, [key]: v }))}
                           />
                         </div>
                       );
                     })}
+
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <GhostButton onClick={() => setStep(1)}>← Back</GhostButton>
                       <PrimaryButton type="submit">Next: syllabus →</PrimaryButton>
@@ -325,7 +358,7 @@ export default function OnboardingPage() {
                       <div>
                         <h2 className="text-[22px] font-semibold tracking-tight">Exam syllabus</h2>
                         <p className="mt-1 text-[14px] text-[#999]">
-                          Uncheck chapters NOT in this exam — daily pace stays honest.
+                          Uncheck chapters NOT in your target syllabus — daily pace stays honest.
                         </p>
                       </div>
                       <span className="tnum shrink-0 rounded-full bg-white/[0.07] px-3 py-1.5 font-mono text-[12px] font-bold ring-1 ring-white/10">
@@ -333,7 +366,7 @@ export default function OnboardingPage() {
                       </span>
                     </div>
                     <div className="mt-4 max-h-[46dvh] overflow-y-auto pr-1">
-                      <SyllabusChecklist grade={grade} value={syllabus} onChange={setSyllabus} />
+                      <SyllabusChecklist grade={grade} targetExam={targetExam} value={syllabus} onChange={setSyllabus} />
                     </div>
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       <GhostButton onClick={() => setStep(2)}>← Back</GhostButton>
@@ -358,11 +391,11 @@ export default function OnboardingPage() {
                       )}
                     </div>
                     <div className="mt-4 max-h-[42dvh] space-y-3 overflow-y-auto pr-1">
-                      {getSubjects(grade).map((s) => {
+                      {currentSubjects.map((s) => {
                         const rows = s.groups.flatMap((g) =>
                           g.chapters
                             .filter((ch) =>
-                              (syllabus[s.id] ?? []).includes(scopedChapterId(s.id, g.id, ch.id, grade)),
+                              (syllabus[s.id] ?? []).includes(scopedChapterId(s.id, g.id, ch.id, targetExam || grade)),
                             )
                             .map((ch) => ({ ch })),
                         );

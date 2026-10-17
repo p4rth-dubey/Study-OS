@@ -3,9 +3,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useTracker, STORAGE_KEY, type AppState } from "../../../lib/storage";
+import { useTracker, STORAGE_KEY, type AppState, type Datesheet } from "../../../lib/storage";
 import { isMuted, previewSound, setMuted } from "../../../lib/celebrate";
-import { getSubjects } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
+import { EXAM_GOALS } from "../onboarding/page";
 import { getOrderedSubjectPaces } from "../../../lib/planner";
 import {
   Card,
@@ -128,10 +129,57 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-[15px] font-semibold">Target Examination &amp; Stream</h2>
+            <p className="mt-0.5 text-[13px] text-[#999]">
+              Switching your target dynamically updates your navigation, syllabus checklist, and practice test modules.
+            </p>
+          </div>
+          <span className="rounded-full bg-[#0099ff]/10 px-3 py-1 font-mono text-[12px] font-bold text-[#0099ff]">
+            {profile.targetExam ? profile.targetExam.toUpperCase() : `Class ${profile.grade}`}
+          </span>
+        </div>
+        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {EXAM_GOALS.map((opt) => {
+            const active = (profile.targetExam || (profile.grade === 9 ? "cbse-9" : "cbse-10")) === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => {
+                  store.updateTargetExam(opt.id);
+                }}
+                className={`flex flex-col justify-between rounded-[12px] p-3 text-left ring-1 transition-all ${
+                  active
+                    ? "bg-white text-black ring-white shadow-md"
+                    : "bg-[#1c1c1c] ring-white/10 hover:bg-[#252525]"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-[14px]">{opt.title}</span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                      active ? "bg-black/10 text-black" : "bg-white/10 text-[#bbb]"
+                    }`}
+                  >
+                    {opt.tag}
+                  </span>
+                </div>
+                <span className={`mt-1 text-[12px] ${active ? "text-black/70" : "text-[#888]"}`}>
+                  {opt.subtitle}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Card>
         <h2 className="text-[15px] font-semibold">Progress at a glance</h2>
         <dl className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {(() => {
-            const subjects = getSubjects(profile.grade);
+            const subjects = getSubjectsForProfile(profile);
             const paces = getOrderedSubjectPaces(profile, subjects);
             const total = paces.reduce((n, p) => n + p.totalStages, 0);
             const done = paces.reduce((n, p) => n + p.completedStages, 0);
@@ -182,28 +230,34 @@ export default function SettingsPage() {
       </Card>
 
       <Card>
-        <h2 className="text-[15px] font-semibold">Exam datesheet — Class {profile.grade}</h2>
+        <h2 className="text-[15px] font-semibold">
+          Exam datesheet — {profile.targetExam ? profile.targetExam.toUpperCase() : `Class ${profile.grade}`}
+        </h2>
         <form
           className="mt-3 space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
-            store.updateDatesheet({
-              science: String(fd.get("science") ?? ""),
-              maths: String(fd.get("maths") ?? ""),
-              sst: String(fd.get("sst") ?? ""),
-            });
+            const updatedDates: Datesheet = { ...profile.datesheet };
+            for (const s of getSubjectsForProfile(profile)) {
+              const k = s.examKey || s.id;
+              updatedDates[k] = String(fd.get(k) ?? "");
+            }
+            store.updateDatesheet(updatedDates);
           }}
         >
-          {(["science", "maths", "sst"] as const).map((k) => (
-            <DateField
-              key={k}
-              name={k}
-              label={`${k === "maths" ? "Mathematics" : k === "sst" ? "Social Science" : "Science"} exam date`}
-              defaultValue={profile.datesheet[k]}
-              required
-            />
-          ))}
+          {getSubjectsForProfile(profile).map((s) => {
+            const k = s.examKey || s.id;
+            return (
+              <DateField
+                key={k}
+                name={k}
+                label={`${s.name} exam date`}
+                defaultValue={profile.datesheet[k]}
+                required
+              />
+            );
+          })}
           <PrimaryButton small type="submit">
             Save datesheet
           </PrimaryButton>
@@ -366,7 +420,7 @@ export default function SettingsPage() {
           <p className="mb-3 text-[13px] text-[#999]">
             Uncheck chapters NOT in this exam — pace stays honest.
           </p>
-          <SyllabusChecklist grade={profile.grade} value={draft} onChange={setDraft} />
+          <SyllabusChecklist grade={profile.grade} targetExam={profile.targetExam} value={draft} onChange={setDraft} />
           <div className="mt-4 flex justify-end gap-2">
             <GhostButton small onClick={() => setSyllabusOpen(false)}>
               Cancel

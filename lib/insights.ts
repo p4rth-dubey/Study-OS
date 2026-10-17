@@ -77,7 +77,7 @@ export function calculateSubjectAnalytics(
   subject: Subject,
 ): SubjectAnalytics {
   const pace = calculateSubjectPace(profile, subject);
-  const stageKeys = getStageKeys(profile.grade);
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
   const today = new Date(todayString());
 
   let recent = 0;

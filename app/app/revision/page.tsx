@@ -3,7 +3,7 @@
 "use client";
 
 import { useTracker } from "../../../lib/storage";
-import { getSubjects } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
 import { getStageKeys, getStageLabel } from "../../../lib/stages";
 import { CountUp, Reveal } from "../../../lib/motion";
 import { Card, EmptyNotice, GhostButton } from "../../../components/tracker-ui";
@@ -28,12 +28,12 @@ export default function RevisionPage() {
 
   const now = Date.now();
   const items: StaleItem[] = [];
-  for (const s of getSubjects(profile.grade)) {
+  for (const s of getSubjectsForProfile(profile)) {
     for (const g of s.groups) {
       for (const ch of g.chapters) {
         const prog = profile.progress[`${s.id}.${ch.id}`];
         if (!prog) continue;
-        for (const sk of getStageKeys(profile.grade)) {
+        for (const sk of getStageKeys(profile.targetExam || profile.grade)) {
           if (prog[sk] !== "done" || !prog.updatedAt) continue;
           const daysAgo = Math.max(
             0,

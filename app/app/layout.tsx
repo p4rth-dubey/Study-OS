@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { TrackerProvider, useTracker } from "../../lib/storage";
-import { getSubjects } from "../../lib/chapters";
+import { getSubjects, getSubjectsForProfile } from "../../lib/chapters";
 import { getStageLabel } from "../../lib/stages";
 import { getTodaysFocus } from "../../lib/planner";
 import { reducedMotion } from "../../lib/motion";
@@ -19,6 +19,8 @@ import { BrandMark } from "../../components/site-header";
 const TABS = [
   { href: "/app/dashboard", label: "Home", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z" },
   { href: "/app/practice", label: "Practice Lab", icon: "M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z" },
+  { href: "/app/neet", label: "NEET", icon: "M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z" },
+  { href: "/app/jee", label: "JEE", icon: "M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z" },
   { href: "/app/exams", label: "Exams Hub", icon: "M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 9L12 4.34 20.55 9 12 13.66 3.45 9zM5 12.06v4.67l7 3.82 7-3.82v-4.67l-7 3.82-7-3.82z" },
   { href: "/app/updates", label: "Exam Updates", icon: "M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9zm-6 13a2 2 0 01-2-2h4a2 2 0 01-2 2z" },
   { href: "/app/scholarships", label: "Scholarships", icon: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" },
@@ -32,6 +34,59 @@ const TABS = [
   { href: "/app/resources", label: "Resources", icon: "M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-1 9h-4v4h-2v-4H9V9h4V5h2v4h4v2z" },
   { href: "/app/settings", label: "Settings", icon: "M12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6zm9.14-3.6c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z" },
 ];
+
+function getPersonalizedTabs(profile: { grade?: number; targetExam?: string } | null) {
+  if (!profile) return TABS.filter((t) => !["/app/jee", "/app/neet"].includes(t.href));
+  const exam = profile.targetExam || (profile.grade === 9 ? "cbse-9" : "cbse-10");
+
+  if (exam === "cbse-9") {
+    return TABS.filter(
+      (t) => !["/app/jee", "/app/neet", "/app/resources", "/app/current-affairs", "/app/updates", "/app/scholarships"].includes(t.href)
+    );
+  }
+
+  if (exam === "cbse-10") {
+    return TABS.filter(
+      (t) => !["/app/jee", "/app/neet", "/app/current-affairs", "/app/updates", "/app/scholarships"].includes(t.href)
+    );
+  }
+
+  if (exam === "jee-main" || exam === "jee-advanced") {
+    return TABS.filter(
+      (t) => !["/app/neet", "/app/current-affairs", "/app/scholarships", "/app/resources"].includes(t.href)
+    );
+  }
+
+  if (exam === "neet-ug") {
+    return TABS.filter(
+      (t) => !["/app/jee", "/app/current-affairs", "/app/scholarships", "/app/resources"].includes(t.href)
+    );
+  }
+
+  if (exam === "upsc-cse" || exam === "ssc-cgl" || exam === "banking-po") {
+    return TABS.filter(
+      (t) => !["/app/jee", "/app/neet", "/app/resources"].includes(t.href)
+    );
+  }
+
+  return TABS.filter((t) => !["/app/jee", "/app/neet", "/app/current-affairs"].includes(t.href));
+}
+
+function getExamLabel(profile: { grade?: number; targetExam?: string } | null): string {
+  if (!profile) return "CBSE Class 10";
+  const exam = profile.targetExam || (profile.grade === 9 ? "cbse-9" : "cbse-10");
+  switch (exam) {
+    case "jee-main": return "JEE Main";
+    case "jee-advanced": return "JEE Advanced";
+    case "neet-ug": return "NEET-UG";
+    case "upsc-cse": return "UPSC CSE";
+    case "ssc-cgl": return "SSC CGL";
+    case "banking-po": return "Banking PO";
+    case "cbse-9": return "CBSE Class 9";
+    case "cbse-10": return "CBSE Class 10";
+    default: return `Class ${profile.grade}`;
+  }
+}
 
 function Shell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -48,8 +103,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     }
   }, [ready, state.profiles.length, pathname, router]);
 
-  const tabs =
-    profile && profile.grade === 9 ? TABS.filter((t) => t.href !== "/app/resources") : TABS;
+  const tabs = getPersonalizedTabs(profile);
   const showNav = ready && state.profiles.length > 0 && pathname !== "/app/onboarding";
 
   return (
@@ -61,7 +115,18 @@ function Shell({ children }: { children: React.ReactNode }) {
             <BrandMark size={32} />
             <span className="text-[15px] font-semibold tracking-tight">StudyOS</span>
           </Link>
-          <nav className="mt-6 flex max-h-[55dvh] flex-col gap-1 overflow-y-auto" aria-label="Tracker">
+          {profile && (
+            <div className="mt-3 flex items-center justify-between rounded-xl bg-white/[0.05] px-3 py-2 text-xs ring-1 ring-white/10">
+              <div className="flex items-center gap-2 truncate">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-[#0099ff] animate-pulse" />
+                <span className="truncate font-semibold text-white">{getExamLabel(profile)}</span>
+              </div>
+              <Link href="/app/settings" className="shrink-0 text-[11px] font-medium text-[#0099ff] hover:underline">
+                Switch
+              </Link>
+            </div>
+          )}
+          <nav className="mt-4 flex max-h-[52dvh] flex-col gap-1 overflow-y-auto" aria-label="Tracker">
             {tabs.map((t) => {
               const active = pathname === t.href || (t.href === "/app/dashboard" && pathname === "/app");
               return (
@@ -259,8 +324,7 @@ function MobileDrawer({ open, onClose, onQuickLog }: { open: boolean; onClose: (
   }, [open ]);
 
   if (!open) return null;
-  const tabs =
-    profile && profile.grade === 9 ? TABS.filter((t) => t.href !== "/app/resources") : TABS;
+  const tabs = getPersonalizedTabs(profile);
 
   return (
     <div className="fixed inset-0 z-[80] lg:hidden" role="dialog" aria-modal="true" aria-label="Navigation">
@@ -272,7 +336,7 @@ function MobileDrawer({ open, onClose, onQuickLog }: { open: boolean; onClose: (
         <div className="flex items-center justify-between">
           <span className="flex items-center gap-2.5">
             <BrandMark size={32} />
-            <span className="text-[15px] font-semibold tracking-tight">PrepTrack</span>
+            <span className="text-[15px] font-semibold tracking-tight">StudyOS</span>
           </span>
           <button
             type="button"
@@ -294,7 +358,7 @@ function MobileDrawer({ open, onClose, onQuickLog }: { open: boolean; onClose: (
             <div className="min-w-0 flex-1">
               <p className="truncate text-[15px] font-semibold">{profile.name}</p>
               <p className="text-[13px] text-[#999]">
-                Class {profile.grade} · {profile.streak ? `${profile.streak.count}-day streak` : "new"}
+                {getExamLabel(profile)} · {profile.streak ? `${profile.streak.count}-day streak` : "new"}
               </p>
             </div>
           </div>
@@ -361,7 +425,7 @@ function QuickLogSheet({ open, onClose }: { open: boolean; onClose: () => void }
   if (!open) return null;
   const profile = store.profile;
   if (!profile) return null;
-  const focus = getTodaysFocus(profile, getSubjects(profile.grade));
+  const focus = getTodaysFocus(profile, getSubjectsForProfile(profile));
 
   return (
     <div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label="Quick log">

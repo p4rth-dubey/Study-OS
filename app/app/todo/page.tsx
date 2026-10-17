@@ -4,8 +4,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useTracker } from "../../../lib/storage";
-import { getSubjects } from "../../../lib/chapters";
+import { useTracker, type Todo } from "../../../lib/storage";
+import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
 import { celebrate } from "../../../lib/celebrate";
 import { Card, EmptyNotice, Pill, PrimaryButton } from "../../../components/tracker-ui";
 import { Reveal } from "../../../lib/motion";
@@ -22,7 +22,7 @@ export default function TodoPage() {
   if (!ready) return null;
   if (!profile) return <EmptyNotice title="No student yet" copy="Finish onboarding first." />;
 
-  const subjects = getSubjects(profile.grade);
+  const subjects = getSubjectsForProfile(profile);
   const todos = profile.todos ?? [];
   const open = todos.filter((t) => !t.done);
   const done = todos.filter((t) => t.done);

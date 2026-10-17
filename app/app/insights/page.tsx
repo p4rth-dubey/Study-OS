@@ -2,7 +2,8 @@
 "use client";
 
 import { useTracker } from "../../../lib/storage";
-import { getSubjects } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
+import { EXAM_REGISTRY } from "../../../lib/exams/registry";
 import { calculateSubjectAnalytics, get7DayActivity } from "../../../lib/insights";
 import { Card, CircleChart, EmptyNotice, StatusTag } from "../../../components/tracker-ui";
 
@@ -13,16 +14,23 @@ export default function InsightsPage() {
   if (!ready) return null;
   if (!profile) return <EmptyNotice title="No data yet" copy="Finish onboarding to see analytics." />;
 
-  const subjects = getSubjects(profile.grade);
+  const subjects = getSubjectsForProfile(profile);
   const trend = get7DayActivity(profile);
   const max = Math.max(...trend.counts, 5);
   const analytics = subjects.map((s) => calculateSubjectAnalytics(profile, s));
+  const examConfig = profile.targetExam ? EXAM_REGISTRY[profile.targetExam] : null;
+  const examLabel = examConfig?.name ?? (profile.targetExam ? profile.targetExam.toUpperCase() : `Class ${profile.grade}`);
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-[24px] font-semibold tracking-tight">Insights</h1>
-        <p className="mt-0.5 text-[14px] text-[#999]">Class {profile.grade} preparation analytics.</p>
+        <div className="flex items-center gap-2">
+          <h1 className="text-[24px] font-semibold tracking-tight">{examConfig?.shortName ?? `Class ${profile.grade}`} Insights</h1>
+          <span className="rounded-full bg-[#0099ff]/10 px-2.5 py-0.5 font-mono text-[11px] font-bold text-[#0099ff]">
+            {examConfig?.category ? examConfig.category.toUpperCase() : "ACTIVE GOAL"}
+          </span>
+        </div>
+        <p className="mt-0.5 text-[14px] text-[#999]">Targeted preparation analytics and pace breakdown for {examLabel}.</p>
       </div>
 
       <Card>

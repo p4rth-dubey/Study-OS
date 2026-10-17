@@ -18,7 +18,7 @@ export interface ChapterGroup {
 export interface Subject {
   id: string;
   name: string;
-  examKey: "science" | "maths" | "sst";
+  examKey: string;
   groups: ChapterGroup[];
 }
 

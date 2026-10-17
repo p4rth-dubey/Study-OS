@@ -3,7 +3,7 @@
 "use client";
 
 import { useTracker } from "../../../lib/storage";
-import { getSubjects } from "../../../lib/chapters";
+import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
 import { getStageKeys, getStageLabel } from "../../../lib/stages";
 import {
   calculateSubjectAnalytics,
@@ -20,7 +20,7 @@ export default function AnalysisPage() {
   if (!ready) return null;
   if (!profile) return <EmptyNotice title="No data yet" copy="Finish onboarding to see analysis." />;
 
-  const subjects = getSubjects(profile.grade);
+  const subjects = getSubjectsForProfile(profile);
   const analytics = subjects.map((s) => ({
     ...calculateSubjectAnalytics(profile, s),
     forecast: forecastFinish(profile, s),
@@ -35,7 +35,7 @@ export default function AnalysisPage() {
   });
   const bestDay = DAYS[new Date(trend.dates[bestIdx] + "T12:00:00").getDay()];
   const weekTotal = trend.counts.reduce((n, c) => n + c, 0);
-  const stageKeys = getStageKeys(profile.grade);
+  const stageKeys = getStageKeys(profile.targetExam || profile.grade);
 
   return (
     <div className="space-y-4">

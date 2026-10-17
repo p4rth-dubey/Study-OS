@@ -208,5 +208,40 @@ test("Scholarship directory contains verified national schemes", () => {
   }
 });
 
+import { getSubjectsForProfile } from "../lib/chapters.ts";
+import { getStageKeys } from "../lib/stages.ts";
+
+// 6. Multi-Exam Curriculum Personalization
+test("Curriculum personalization engine maps authentic subjects for JEE, NEET, UPSC, SSC, and CBSE", () => {
+  const jeeSubs = getSubjectsForProfile({ targetExam: "jee-main", grade: 12 });
+  assert.deepStrictEqual(jeeSubs.map(s => s.id), ["physics", "chemistry", "maths"], "JEE must have Physics, Chemistry, Maths");
+  assert(jeeSubs.reduce((acc, s) => acc + s.groups.reduce((gacc, g) => gacc + g.chapters.length, 0), 0) >= 40, "JEE should have extensive chapters");
+
+  const neetSubs = getSubjectsForProfile({ targetExam: "neet-ug", grade: 12 });
+  assert.deepStrictEqual(neetSubs.map(s => s.id), ["physics", "chemistry", "biology"], "NEET must have Physics, Chemistry, Biology");
+  assert(neetSubs.reduce((acc, s) => acc + s.groups.reduce((gacc, g) => gacc + g.chapters.length, 0), 0) >= 40, "NEET should have extensive chapters");
+
+  const cbseSubs = getSubjectsForProfile({ targetExam: "cbse-10", grade: 10 });
+  assert.deepStrictEqual(cbseSubs.map(s => s.id), ["science", "maths", "sst"], "CBSE 10 must have Science, Maths, SST");
+
+  const upscSubs = getSubjectsForProfile({ targetExam: "upsc-cse", grade: 12 });
+  assert.deepStrictEqual(upscSubs.map(s => s.id), ["gs-paper-1", "csat-paper-2"], "UPSC must have GS-1 and CSAT");
+});
+
+// 7. Exam Stage Keys
+test("Stage keys are customized per stream", () => {
+  const jeeStages = getStageKeys("jee-main");
+  assert.deepStrictEqual(jeeStages, ["theory", "ncert", "pyq", "revision"]);
+
+  const neetStages = getStageKeys("neet-ug");
+  assert.deepStrictEqual(neetStages, ["theory", "ncert", "pyq", "revision"]);
+
+  const cbse10Stages = getStageKeys("cbse-10");
+  assert.deepStrictEqual(cbse10Stages, ["theory", "ncert", "exemplar", "pyq", "cbq"]);
+
+  const cbse9Stages = getStageKeys("cbse-9");
+  assert.deepStrictEqual(cbse9Stages, ["theory", "ncert", "revision"]);
+});
+
 console.log(`\n==== Test Results: ${passed} passed, ${failed} failed ====`);
 if (failed > 0) process.exit(1);
