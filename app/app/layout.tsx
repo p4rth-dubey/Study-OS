@@ -19,8 +19,8 @@ import { BrandMark } from "../../components/site-header";
 const TABS = [
   { href: "/app/dashboard", label: "Home", icon: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z" },
   { href: "/app/practice", label: "Practice Lab", icon: "M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z" },
-  { href: "/app/neet", label: "NEET", icon: "M32 8a24 24 0 1 0 0 48a24 24 0 1 0 0-48 M32 20v24 M20 32h24 M8 34h12l5-10 8 20 5-10h18" },
-  { href: "/app/jee", label: "JEE", icon: "M10 54V10h44v44z M18 44L32 16l14 28z M25 44l7-14 7 14 M14 49h36 M32 10v6 M10 32h8 M46 32h8" },
+  { href: "/app/neet", label: "NEET", icon: "M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z" },
+  { href: "/app/jee", label: "JEE", icon: "M9 3L5 6.99h3V14h2V6.99h3L9 3zm7 14.01V10h-2v7.01h-3L15 21l4-3.99h-3z" },
   { href: "/app/exams", label: "Exams Hub", icon: "M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM3.45 9L12 4.34 20.55 9 12 13.66 3.45 9zM5 12.06v4.67l7 3.82 7-3.82v-4.67l-7 3.82-7-3.82z" },
   { href: "/app/updates", label: "Exam Updates", icon: "M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9zm-6 13a2 2 0 01-2-2h4a2 2 0 01-2 2z" },
   { href: "/app/scholarships", label: "Scholarships", icon: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" },
