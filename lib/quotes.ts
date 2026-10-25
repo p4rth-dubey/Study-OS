@@ -61,10 +61,10 @@ export const MOTIVATIONAL_QUOTES: MotivationalQuote[] = [
     category: "focus",
   },
   {
-    id: "q-ambedkar-1",
-    quote: "Cultivation of mind should be the ultimate aim of human existence.",
-    author: "Dr. B.R. Ambedkar",
-    role: "Chief Architect of the Constitution",
+    id: "q-parth-1",
+    quote: "It's always YOU vs YOU. And one of you has to die. So, choose wisely.",
+    author: "Parth Veer Dubey",
+    role: "Developer of the Website",
     category: "focus",
   },
   {
