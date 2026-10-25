@@ -12,6 +12,8 @@ import { calculateSubjectAnalytics } from "../../../lib/insights";
 import { CountUp, Reveal } from "../../../lib/motion";
 import { celebrate } from "../../../lib/celebrate";
 import { Card, CircleChart, EmptyNotice, PrimaryButton, SpotCard, StatusTag } from "../../../components/tracker-ui";
+import { getDailyQuote } from "../../../lib/quotes";
+import ThemeSwitcher from "../../../components/theme-switcher";
 
 export default function DashboardPage() {
   const store = useTracker();
@@ -46,6 +48,7 @@ export default function DashboardPage() {
 
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const quote = getDailyQuote();
 
   return (
     <div className="space-y-4 lg:space-y-5">
@@ -83,8 +86,8 @@ export default function DashboardPage() {
         <section className="relative overflow-hidden rounded-[20px] bg-[#141414] p-5 ring-1 ring-white/[0.06] sm:p-7 lg:p-8">
           <div
             aria-hidden
-            className="pointer-events-none absolute -top-24 right-[-60px] h-56 w-56 rounded-full opacity-[0.13] blur-[90px]"
-            style={{ background: "linear-gradient(135deg, #6a4cf5, #d44df0)" }}
+            className="pointer-events-none absolute -top-24 right-[-60px] h-56 w-56 rounded-full opacity-[0.14] blur-[90px] transition-colors duration-500"
+            style={{ background: "var(--theme-gradient, linear-gradient(135deg, #6a4cf5, #d44df0))" }}
           />
           <div className="relative flex flex-wrap items-center gap-4 sm:gap-5 lg:gap-8">
             <CircleChart pct={overall} size={88} sub="complete" />
@@ -138,6 +141,44 @@ export default function DashboardPage() {
             </div>
           </div>
         </section>
+      </Reveal>
+
+      {/* Motivational Quote & Atmosphere Panel */}
+      <Reveal delay={0.03}>
+        <div className="relative overflow-hidden rounded-[20px] bg-gradient-to-r from-white/[0.04] via-[#141414] to-white/[0.02] p-4.5 ring-1 ring-white/[0.07] sm:p-5">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-12 -top-12 h-36 w-36 rounded-full opacity-[0.15] blur-[55px] transition-colors duration-500"
+            style={{ background: "var(--theme-gradient, linear-gradient(135deg, #6a4cf5, #d44df0))" }}
+          />
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.06] text-[18px] ring-1 ring-white/10" aria-hidden="true">
+                ✨
+              </span>
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-mono text-[10.5px] font-semibold uppercase tracking-[0.1em] text-[var(--theme-highlight,#a855f7)]">
+                    Daily Spark · Mindset
+                  </span>
+                  <span className="text-[11px] text-[#555]">•</span>
+                  <span className="text-[11px] text-[#777]">Steady daily motivation</span>
+                </div>
+                <p className="text-[14px] sm:text-[15px] font-medium text-[#eee] italic leading-relaxed">
+                  &ldquo;{quote.quote}&rdquo;
+                </p>
+                <p className="mt-1 text-[12px] font-semibold text-[#aaa]">
+                  — {quote.author} <span className="text-[#666] font-normal">({quote.role})</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+              <span className="text-[11px] font-mono text-[#666] uppercase tracking-wider hidden md:inline">Theme</span>
+              <ThemeSwitcher compact />
+            </div>
+          </div>
+        </div>
       </Reveal>
 
       {/* Subjects */}

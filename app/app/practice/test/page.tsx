@@ -7,6 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { VERIFIED_QUESTION_BANK } from "../../../../lib/practice/question-bank";
 import { evaluateTestAttempt } from "../../../../lib/practice/evaluator";
+import { getExamById } from "../../../../lib/exams/registry";
+import { useTracker } from "../../../../lib/storage";
 import {
   clearActiveSession,
   loadActiveSession,
@@ -29,6 +31,10 @@ export default function MockTestRunnerPage() {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  const { profile } = useTracker();
+  const userGoalId = profile?.targetExam || (profile?.grade === 9 ? "cbse-9" : "cbse-10");
+  const exam = getExamById(userGoalId) || getExamById("cbse-10")!;
+
   // Initialize or restore active session
   useEffect(() => {
     const existing = loadActiveSession();
@@ -38,13 +44,14 @@ export default function MockTestRunnerPage() {
       return;
     }
 
-    // If no active session, create a default practice session using verified questions
-    const defaultQuestions: Question[] = VERIFIED_QUESTION_BANK.slice(0, 8);
+    // If no active session, create a default practice session using verified questions for user's goal
+    const examQuestions = VERIFIED_QUESTION_BANK.filter((q) => q.examId === userGoalId);
+    const defaultQuestions: Question[] = (examQuestions.length > 0 ? examQuestions : VERIFIED_QUESTION_BANK).slice(0, 8);
     const newPaper: TestPaper = {
       id: `test_cbt_${Date.now()}`,
-      examId: "jee-main",
-      title: "All-India Engineering & Science Practice Simulation",
-      category: "engineering",
+      examId: userGoalId,
+      title: `${exam.shortName} High-Yield Practice Simulation`,
+      category: exam.category,
       durationMinutes: 15,
       totalMarks: defaultQuestions.reduce((a, b) => a + b.marks, 0),
       questions: defaultQuestions,

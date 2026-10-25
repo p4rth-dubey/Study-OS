@@ -66,7 +66,7 @@ function AuthGate({ onContinue }: { onContinue: () => void }) {
 
   const handleGoogleSignIn = async () => {
     try {
-      setSigningIn(true);
+      setSigningIn(true); 
       setError(null);
       await signInWithGoogle("/app/onboarding");
       // signInWithGoogle triggers a full-page redirect, so nothing after this runs.

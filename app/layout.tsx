@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { assetUrl } from "../lib/site";
 import SwRegister from "../components/sw-register";
 import CursorExclusion from "./CursorExclusion";
+import ThemeInitializer from "../components/theme-initializer";
 import "./globals.css";
 
 const inter = Inter({
@@ -72,6 +73,7 @@ export default function RootLayout(props: LayoutProps<"/">) {
       className={`${inter.variable} ${grotesk.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-[#090909] text-white">
+        <ThemeInitializer />
         {props.children}
         <SwRegister />
         <CursorExclusion />

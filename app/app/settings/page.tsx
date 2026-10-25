@@ -18,6 +18,7 @@ import {
   inputCls,
 } from "../../../components/tracker-ui";
 import SyllabusChecklist from "../../../components/syllabus-checklist";
+import ThemeSwitcher from "../../../components/theme-switcher";
 
 export default function SettingsPage() {
   const store = useTracker();
@@ -262,6 +263,20 @@ export default function SettingsPage() {
             Save datesheet
           </PrimaryButton>
         </form>
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-[15px] font-semibold">Accent Theme &amp; Color Palette</h2>
+            <p className="mt-1 text-[13px] text-[#999]">
+              Choose from 5 atmospheric neon &amp; aurora themes while preserving the signature dark contrast.
+            </p>
+          </div>
+        </div>
+        <div className="mt-4">
+          <ThemeSwitcher />
+        </div>
       </Card>
 
       <Card>

@@ -116,14 +116,9 @@ function Shell({ children }: { children: React.ReactNode }) {
             <span className="text-[15px] font-semibold tracking-tight">StudyOS</span>
           </Link>
           {profile && (
-            <div className="mt-3 flex items-center justify-between rounded-xl bg-white/[0.05] px-3 py-2 text-xs ring-1 ring-white/10">
-              <div className="flex items-center gap-2 truncate">
-                <span className="h-2 w-2 shrink-0 rounded-full bg-[#0099ff] animate-pulse" />
-                <span className="truncate font-semibold text-white">{getExamLabel(profile)}</span>
-              </div>
-              <Link href="/app/settings" className="shrink-0 text-[11px] font-medium text-[#0099ff] hover:underline">
-                Switch
-              </Link>
+            <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-2 text-xs ring-1 ring-white/10">
+              <span className="h-2 w-2 shrink-0 rounded-full bg-[var(--theme-accent,#0099ff)] animate-pulse" />
+              <span className="truncate font-semibold text-white">{getExamLabel(profile)}</span>
             </div>
           )}
           <nav className="mt-4 flex max-h-[52dvh] flex-col gap-1 overflow-y-auto" aria-label="Tracker">

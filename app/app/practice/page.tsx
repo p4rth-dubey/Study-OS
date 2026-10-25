@@ -2,10 +2,10 @@
  * Allows students to configure, launch, and review high-yield practice drills and full CBT mock tests. */
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getAllExams, getExamById } from "../../../lib/exams/registry";
+import { getExamById } from "../../../lib/exams/registry";
 import { loadActiveSession, loadTestHistory } from "../../../lib/practice/storage";
 import { useTracker } from "../../../lib/storage";
 import type { PracticeConfig, PracticeMode, TestPaper, TestAttemptState, TestResult } from "../../../lib/practice/types";
@@ -16,9 +16,10 @@ function PracticeHubPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { profile } = useTracker();
-  const exams = getAllExams();
+  const userGoalId = profile?.targetExam || (profile?.grade === 9 ? "cbse-9" : "cbse-10");
+  const selectedExam = getExamById(userGoalId) || getExamById("cbse-10")!;
+  const selectedExamId = selectedExam.id;
 
-  const [selectedExamId, setSelectedExamId] = useState<string>("cbse-10");
   const [mode, setMode] = useState<PracticeMode>("full_mock");
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
   const [questionCount, setQuestionCount] = useState<number>(10);
@@ -27,20 +28,170 @@ function PracticeHubPageInner() {
   const [history, setHistory] = useState<TestResult[]>([]);
 
   useEffect(() => {
-    const qExam = searchParams.get("exam");
-    if (qExam) {
-      setSelectedExamId(qExam);
-    } else if (profile?.targetExam) {
-      setSelectedExamId(profile.targetExam);
-    }
-  }, [searchParams, profile?.targetExam]);
-
-  useEffect(() => {
     setActiveSession(loadActiveSession());
     setHistory(loadTestHistory());
   }, []);
 
-  const selectedExam = getExamById(selectedExamId) || exams[0];
+  // Dynamically tailor curated drills to the student's selected class/exam
+  const curatedDrills = useMemo(() => {
+    const examTarget = selectedExamId;
+    if (examTarget === "cbse-10") {
+      return [
+        {
+          title: "CBSE Class 10 Science Board Rehearsal",
+          examId: "cbse-10",
+          subjectId: "science",
+          count: 10,
+          badge: "Class 10 Science",
+          desc: "Real board questions on Chemical Reactions, Electricity, and Light.",
+        },
+        {
+          title: "Class 10 Standard Mathematics Speed Drill",
+          examId: "cbse-10",
+          subjectId: "maths",
+          count: 10,
+          badge: "Class 10 Maths",
+          desc: "High-yield Quadratic Equations, Arithmetic Progressions, and Trigonometry.",
+        },
+        {
+          title: "Social Science Board Assertion & MCQs",
+          examId: "cbse-10",
+          subjectId: "sst",
+          count: 10,
+          badge: "Class 10 SST",
+          desc: "Past board questions from Nationalism in India, Power Sharing & Resources.",
+        },
+      ];
+    }
+    if (examTarget === "cbse-9") {
+      return [
+        {
+          title: "Class 9 Science Motion & Forces Rapid Drill",
+          examId: "cbse-9",
+          subjectId: "science",
+          count: 10,
+          badge: "Class 9 Science",
+          desc: "Numerical calculations on average speed, acceleration, and Newton's laws.",
+        },
+        {
+          title: "Class 9 Mathematics Number Systems & Algebra",
+          examId: "cbse-9",
+          subjectId: "maths",
+          count: 10,
+          badge: "Class 9 Maths",
+          desc: "Rationalization, polynomials, and coordinate geometry problems.",
+        },
+      ];
+    }
+    if (examTarget === "jee-main" || examTarget === "jee-advanced") {
+      return [
+        {
+          title: "JEE Main Physics Kinematics & Mechanics Drill",
+          examId: "jee-main",
+          subjectId: "physics",
+          count: 10,
+          badge: "JEE Main PYQ",
+          desc: "Authentic NTA projectile, momentum, and rotational motion problems.",
+        },
+        {
+          title: "JEE Main Chemistry VSEPR & Kinetics Rapid",
+          examId: "jee-main",
+          subjectId: "chemistry",
+          count: 10,
+          badge: "JEE Main Chem",
+          desc: "Chemical bonding, equilibrium, and first-order kinetics problems.",
+        },
+        {
+          title: "JEE Main Mathematics Calculus & Matrices",
+          examId: "jee-main",
+          subjectId: "maths",
+          count: 10,
+          badge: "JEE Main Maths",
+          desc: "Calculus limits, continuity, and matrix determinant problems.",
+        },
+      ];
+    }
+    if (examTarget === "neet-ug") {
+      return [
+        {
+          title: "NEET Biology Cell Biology & Genetics Rapid",
+          examId: "neet-ug",
+          subjectId: "biology",
+          count: 15,
+          badge: "NEET Biology",
+          desc: "NCERT line-by-line questions from cell structure, organelles, and genetics.",
+        },
+        {
+          title: "NEET Physics Mechanics & Electrodynamics",
+          examId: "neet-ug",
+          subjectId: "physics",
+          count: 10,
+          badge: "NEET Physics",
+          desc: "High-probability medical entrance physics questions with solutions.",
+        },
+        {
+          title: "NEET Chemistry Equilibrium & Solutions",
+          examId: "neet-ug",
+          subjectId: "chemistry",
+          count: 10,
+          badge: "NEET Chemistry",
+          desc: "Ionic equilibrium, solutions, and organic reaction mechanisms.",
+        },
+      ];
+    }
+    if (examTarget === "upsc-cse") {
+      return [
+        {
+          title: "UPSC Prelims Indian Polity & Constitution",
+          examId: "upsc-cse",
+          subjectId: "gs-paper-1",
+          count: 10,
+          badge: "UPSC Polity",
+          desc: "Constitutional articles, parliamentary procedures, and judicial landmarks.",
+        },
+        {
+          title: "UPSC Prelims Economy & Fiscal Policy",
+          examId: "upsc-cse",
+          subjectId: "gs-paper-1",
+          count: 10,
+          badge: "UPSC Economy",
+          desc: "Capital vs revenue expenditure, monetary policy, and balance of payments.",
+        },
+      ];
+    }
+    if (examTarget === "ssc-cgl") {
+      return [
+        {
+          title: "SSC CGL Arithmetic & Commercial Math",
+          examId: "ssc-cgl",
+          subjectId: "quant",
+          count: 15,
+          badge: "SSC CGL",
+          desc: "Speed drills covering percentage, profit-loss, and TCS arithmetic patterns.",
+        },
+      ];
+    }
+    if (examTarget === "banking-po") {
+      return [
+        {
+          title: "Banking PO Simplification & Number Series",
+          examId: "banking-po",
+          subjectId: "quant",
+          count: 10,
+          badge: "IBPS / SBI",
+          desc: "Number series and approximation drills built for 20-minute sectional mastery.",
+        },
+      ];
+    }
+    return selectedExam.subjects.slice(0, 3).map((sub) => ({
+      title: `${selectedExam.shortName} - ${sub.name} Practice Drill`,
+      examId: selectedExam.id,
+      subjectId: sub.id,
+      count: 10,
+      badge: sub.name,
+      desc: `Curated standard syllabus questions on ${sub.name}.`,
+    }));
+  }, [selectedExamId, selectedExam]);
 
   const handleStartPractice = async (override?: Partial<PracticeConfig>) => {
     setLoading(true);
@@ -161,22 +312,34 @@ function PracticeHubPageInner() {
               </p>
             </div>
 
-            {/* Exam Selector */}
-            <div>
-              <label className="mb-2 block text-[13px] font-medium text-[#ccc]">1. Target Examination</label>
-              <div className="flex flex-wrap gap-2">
-                {exams.map((ex) => (
-                  <Pill
-                    key={ex.id}
-                    active={selectedExamId === ex.id}
-                    onClick={() => {
-                      setSelectedExamId(ex.id);
-                      setSelectedSubjectId("");
-                    }}
-                  >
-                    {ex.shortName}
-                  </Pill>
-                ))}
+            {/* Target Exam Banner - Strictly Personalized to Student's Selected Goal */}
+            <div className="rounded-[16px] bg-white/[0.04] p-4 ring-1 ring-white/10">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white/[0.08] text-[20px]" aria-hidden="true">
+                    🎯
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono text-[11px] font-semibold tracking-wider text-[var(--theme-highlight,#a855f7)] uppercase">
+                        Selected Examination
+                      </span>
+                      <span className="text-[#666]">•</span>
+                      <span className="text-[12px] text-[#aaa]">{selectedExam.category.toUpperCase()}</span>
+                    </div>
+                    <h3 className="text-[17px] font-bold text-white">{selectedExam.name}</h3>
+                    <p className="text-[12.5px] text-[#888]">
+                      {selectedExam.conductingBody} · Academic Session {selectedExam.academicSession}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 self-start sm:self-center">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-[#22c55e]/15 px-3 py-1 font-mono text-[12px] font-semibold text-[#4ade80] ring-1 ring-[#22c55e]/30">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#22c55e] animate-pulse" />
+                    Personalized For You
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -278,60 +441,11 @@ function PracticeHubPageInner() {
       <Reveal delay={0.1}>
         <div className="space-y-3">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-[16px] font-semibold tracking-tight">High-Yield Curated Drills</h2>
+            <h2 className="text-[16px] font-semibold tracking-tight">High-Yield Curated Drills — {selectedExam.shortName}</h2>
             <span className="font-mono text-[12px] text-[#666]">Instant Start</span>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              {
-                title: "JEE Main Physics Kinematics Drill",
-                examId: "jee-main",
-                subjectId: "physics",
-                count: 10,
-                badge: "JEE Main PYQ",
-                desc: "High-probability mechanics & kinematics problems with step-by-step solutions.",
-              },
-              {
-                title: "NEET Biology Cell & Genetics Rapid",
-                examId: "neet-ug",
-                subjectId: "biology",
-                count: 15,
-                badge: "NEET NCERT",
-                desc: "100% NCERT line-by-line questions from cell biology & genetics units.",
-              },
-              {
-                title: "CBSE Class 10 Science Board Rehearsal",
-                examId: "cbse-10",
-                subjectId: "science",
-                count: 10,
-                badge: "CBSE 2024",
-                desc: "Assertion-reason and competency questions mirroring latest board pattern.",
-              },
-              {
-                title: "UPSC Prelims Indian Polity Rapid",
-                examId: "upsc-cse",
-                subjectId: "gs-paper-1",
-                count: 10,
-                badge: "UPSC CSE",
-                desc: "Constitutional articles, parliamentary procedures, and judicial landmarks.",
-              },
-              {
-                title: "SSC CGL Arithmetic & Reasoning Speed",
-                examId: "ssc-cgl",
-                subjectId: "quant",
-                count: 15,
-                badge: "SSC CGL",
-                desc: "Speed drills covering percentage, profit-loss, and TCS pattern reasoning.",
-              },
-              {
-                title: "Banking PO Simplification & Series",
-                examId: "banking-po",
-                subjectId: "quant",
-                count: 10,
-                badge: "IBPS / SBI",
-                desc: "Number series and approximation drills built for 20-minute sectional mastery.",
-              },
-            ].map((drill, idx) => (
+            {curatedDrills.map((drill, idx) => (
               <SpotCard
                 key={idx}
                 className="flex flex-col justify-between rounded-[16px] bg-[#141414] p-4 ring-1 ring-white/[0.06] hover:bg-[#181818]"

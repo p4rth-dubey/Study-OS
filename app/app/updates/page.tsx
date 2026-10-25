@@ -7,6 +7,7 @@ import { getAllUpdates } from "../../../lib/updates/registry";
 import type { EducationUpdate } from "../../../lib/updates/types";
 import { Card, Pill, SpotCard } from "../../../components/tracker-ui";
 import { Reveal } from "../../../lib/motion";
+import { useTracker } from "../../../lib/storage";
 
 const BOOKMARKS_KEY = "studyos_bookmarked_updates_v1";
 
@@ -18,10 +19,24 @@ function daysUntil(dateStr?: string): number | null {
 }
 
 export default function UpdatesPage() {
+  const store = useTracker();
+  const { profile } = store;
   const allUpdates = getAllUpdates();
 
+  // Map user's target exam or grade to their exam category
+  const targetExam = profile?.targetExam || (profile?.grade === 9 ? "cbse-9" : "cbse-10");
+  const userCategory = targetExam.startsWith("cbse")
+    ? "school"
+    : targetExam.includes("jee") || targetExam.includes("gate")
+    ? "engineering"
+    : targetExam.includes("neet")
+    ? "medical"
+    : targetExam.includes("upsc") || targetExam.includes("ssc") || targetExam.includes("bank")
+    ? "government"
+    : "all";
+
   const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("for_you");
   const [selectedType, setSelectedType] = useState<string>("all");
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -48,7 +63,15 @@ export default function UpdatesPage() {
   };
 
   const filteredUpdates = allUpdates.filter((u) => {
-    if (selectedCategory !== "all" && u.examCategory !== selectedCategory) return false;
+    if (selectedCategory === "for_you") {
+      // Prioritize user's exact exam or exam category
+      const matchExam = targetExam && (u.examId === targetExam || u.examName.toLowerCase().includes(targetExam.replace("cbse-", "class ")));
+      const matchCat = userCategory !== "all" && u.examCategory === userCategory;
+      if (!matchExam && !matchCat) return false;
+    } else if (selectedCategory !== "all" && u.examCategory !== selectedCategory) {
+      return false;
+    }
+
     if (selectedType !== "all" && u.category !== selectedType) return false;
     if (search.trim()) {
       const term = search.toLowerCase();
@@ -112,6 +135,9 @@ export default function UpdatesPage() {
           {/* Category Tabs */}
           <div className="flex flex-wrap gap-2">
             {[
+              ...(profile
+                ? [{ id: "for_you", label: `★ For You (${profile.name})` }]
+                : []),
               { id: "all", label: "All Categories" },
               { id: "school", label: "School / CBSE" },
               { id: "engineering", label: "Engineering" },
