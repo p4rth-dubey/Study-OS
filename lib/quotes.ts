@@ -116,7 +116,7 @@ export const MOTIVATIONAL_QUOTES: MotivationalQuote[] = [
 export function getDailyQuote(): MotivationalQuote {
   const now = new Date();
   // 12-hour slot index (2 changes per day maximum)
-  const slot = Math.floor(now.getTime() / (1000 * 60 * 60 * 12));
+  const slot = Math.floor(now.getTime() / (1000 * 60 * 60 * 36));
   const index = Math.abs(slot) % MOTIVATIONAL_QUOTES.length;
   return MOTIVATIONAL_QUOTES[index];
 }
