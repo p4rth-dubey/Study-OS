@@ -55,7 +55,7 @@ export const metadata: Metadata = {
       "Offline-first CBSE Class 9 & 10 prep with exam-syllabus pacing and insights.",
   },
   manifest: "/manifest.webmanifest",
-  icons: { icon: assetUrl("/favicon.png"), apple: assetUrl("/favicon.png") },
+  icons: { icon: assetUrl("/icon.svg"), apple: assetUrl("/icon.svg") },
 };
 
 export const viewport = {
