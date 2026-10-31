@@ -843,7 +843,7 @@ export default function Landing() {
             </nav>
           </div>
           <div className="mt-10 flex flex-col gap-2 border-t border-white/[0.06] pt-5 text-[12.5px] text-[#666] sm:flex-row sm:items-center sm:justify-between">
-            <p>© {new Date().getFullYear()} StudyOS by Parth Veer Dubey. Study data never leaves your device.</p>
+            <p>© {new Date().getFullYear()} StudyOS by Parth Veer Dubey. Study data never leaves your device. Special Contribution : Aditya Dubey , District General Secretary</p>
             <p className="font-mono">pace = remaining ÷ days left</p>
           </div>
         </div>
