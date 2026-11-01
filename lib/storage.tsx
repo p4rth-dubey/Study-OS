@@ -213,6 +213,7 @@ export interface Store {
   deleteTodo: (id: string) => void;
   clearDoneTodos: () => void;
   backfill: (subjectId: string, chapterIds: string[], done: boolean) => void;
+  backfillState: (subjectId: string, chapterIds: string[], state: StageState) => void;
   dismissNotice: (key: "v5NoticeNeeded" | "v6PreResourceNoticeNeeded" | "needsSyllabusConfirmation") => void;
   shouldNudgeBackup: () => boolean;
   exportJson: () => string;
@@ -424,11 +425,34 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
 
       backfill: (subjectId, chapterIds, done) => {
         if (!profile) return;
+        const stateForAllStages: StageState = done ? "done" : "none";
         const keys = getStageKeys(profile.targetExam || profile.grade);
         const progress = { ...profile.progress };
         for (const chId of chapterIds) {
           const cur: ChapterProgress = { ...(progress[`${subjectId}.${chId}`] ?? {}) };
-          for (const sk of keys) cur[sk] = done ? "done" : "none";
+          for (const sk of keys) cur[sk] = stateForAllStages;
+          cur.updatedAt = new Date().toISOString();
+          progress[`${subjectId}.${chId}`] = cur;
+        }
+        const updated: Profile = { ...profile, progress };
+        touchStreak(updated);
+        commit({
+          ...state,
+          profiles: state.profiles.map((p) => (p.id === profile.id ? updated : p)),
+        });
+      },
+
+      /** Set a consistent baseline for a chapter from onboarding.
+       * "progress" makes the chapter visibly in-flight; "done" gives credit
+       * for every stage. The existing boolean backfill API remains intact for
+       * older callers. */
+      backfillState: (subjectId, chapterIds, stateForAllStages) => {
+        if (!profile) return;
+        const keys = getStageKeys(profile.targetExam || profile.grade);
+        const progress = { ...profile.progress };
+        for (const chId of chapterIds) {
+          const cur: ChapterProgress = { ...(progress[`${subjectId}.${chId}`] ?? {}) };
+          for (const sk of keys) cur[sk] = stateForAllStages;
           cur.updatedAt = new Date().toISOString();
           progress[`${subjectId}.${chId}`] = cur;
         }

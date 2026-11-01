@@ -25,7 +25,10 @@ import {
   PrimaryButton,
   inputCls,
 } from "../../../components/tracker-ui";
-import SyllabusChecklist from "../../../components/syllabus-checklist";
+import ChapterPreparationSelector, {
+  getPreparationStatus,
+  type PreparationStatus,
+} from "../../../components/chapter-preparation-selector";
 import { SmoothScroll, reducedMotion } from "../../../lib/motion";
 import { celebrate } from "../../../lib/celebrate";
 import { BrandMark } from "../../../components/site-header";
@@ -34,8 +37,8 @@ import { useAuthUser, signInWithGoogle, signOut } from "../../../lib/auth/helper
 const STEPS = [
   { n: "01", title: "Details", copy: "Who's studying & target goal." },
   { n: "02", title: "Datesheet", copy: "Pace plans backwards from these." },
-  { n: "03", title: "Syllabus", copy: "Only your real exam chapters." },
-  { n: "04", title: "Backfill", copy: "Credit work already done." },
+  { n: "03", title: "Chapters", copy: "Choose the chapters in your exam." },
+  { n: "04", title: "Review", copy: "Start with an honest baseline." },
 ];
 
 export const EXAM_GOALS = [
@@ -177,7 +180,7 @@ export default function OnboardingPage() {
   const [grade, setGrade] = useState(10);
   const [datesheet, setDatesheet] = useState<Datesheet>({ science: "", maths: "", sst: "" });
   const [syllabus, setSyllabus] = useState<Record<string, string[]> | null>(null);
-  const [backfilled, setBackfilled] = useState<Record<string, boolean>>({});
+  const [preparation, setPreparation] = useState<Record<string, PreparationStatus>>({});
   const bodyRef = useRef<HTMLDivElement>(null);
   const barRef = useRef<HTMLSpanElement>(null);
 
@@ -225,7 +228,7 @@ export default function OnboardingPage() {
     setStep(3);
   };
 
-  const finish = (withBackfill: boolean) => {
+  const finish = () => {
     store.createProfile({
       name: name.trim() || user?.name || "Student",
       grade,
@@ -233,15 +236,27 @@ export default function OnboardingPage() {
       datesheet,
       examSyllabus: syllabus,
     });
-    if (withBackfill) {
-      const bySubject: Record<string, string[]> = {};
-      for (const [key, v] of Object.entries(backfilled)) {
-        if (!v) continue;
-        const [sid, cid] = key.split("|");
-        (bySubject[sid] = bySubject[sid] ?? []).push(cid);
+    const partialBySubject: Record<string, string[]> = {};
+    const completeBySubject: Record<string, string[]> = {};
+    for (const subject of currentSubjects) {
+      for (const group of subject.groups) {
+        for (const chapter of group.chapters) {
+          const scopedId = scopedChapterId(subject.id, group.id, chapter.id, targetExam || grade);
+          if (!(syllabus?.[subject.id] ?? []).includes(scopedId)) continue;
+          const status = getPreparationStatus(preparation, subject.id, chapter.id);
+          if (status === "partially-prepared") {
+            (partialBySubject[subject.id] = partialBySubject[subject.id] ?? []).push(chapter.id);
+          }
+          if (status === "completed") {
+            (completeBySubject[subject.id] = completeBySubject[subject.id] ?? []).push(chapter.id);
+          }
+        }
       }
-      for (const [sid, cids] of Object.entries(bySubject)) store.backfill(sid, cids, true);
     }
+    for (const [subjectId, chapterIds] of Object.entries(partialBySubject))
+      store.backfillState(subjectId, chapterIds, "progress");
+    for (const [subjectId, chapterIds] of Object.entries(completeBySubject))
+      store.backfillState(subjectId, chapterIds, "done");
     celebrate("goal");
     router.replace("/app/dashboard");
   };
@@ -252,7 +267,21 @@ export default function OnboardingPage() {
     (n, s) => n + s.groups.reduce((m, g) => m + g.chapters.length, 0),
     0
   );
-  const backfillCount = Object.values(backfilled).filter(Boolean).length;
+  const preparationCounts = currentSubjects.reduce(
+    (counts, subject) => subject.groups.reduce(
+      (groupCounts, group) => group.chapters.reduce((chapterCounts, chapter) => {
+        const scopedId = scopedChapterId(subject.id, group.id, chapter.id, targetExam || grade);
+        if (!(syllabus?.[subject.id] ?? []).includes(scopedId)) return chapterCounts;
+        const status = getPreparationStatus(preparation, subject.id, chapter.id);
+        return {
+          partial: chapterCounts.partial + (status === "partially-prepared" ? 1 : 0),
+          completed: chapterCounts.completed + (status === "completed" ? 1 : 0),
+        };
+      }, groupCounts),
+      counts,
+    ),
+    { partial: 0, completed: 0 },
+  );
 
   return (
     <SmoothScroll>
@@ -560,42 +589,66 @@ export default function OnboardingPage() {
                       <div>
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h2 className="text-[22px] font-semibold tracking-tight">Exam syllabus</h2>
+                            <h2 className="text-[22px] font-semibold tracking-tight">Your chapters, your starting point</h2>
                             <p className="mt-1 text-[14px] text-[#999]">
-                              Uncheck chapters NOT in your target syllabus — daily pace stays honest.
+                              Confirm what&apos;s coming in your exam, then choose an honest preparation level for every chapter.
                             </p>
                           </div>
                           <span className="tnum shrink-0 rounded-full bg-white/[0.07] px-3 py-1.5 font-mono text-[12px] font-bold ring-1 ring-white/10">
                             {selectedCount}/{totalCount}
                           </span>
                         </div>
+                        <div className="mt-4 grid gap-2 rounded-[14px] bg-white/[0.035] p-3 ring-1 ring-white/[0.07] sm:grid-cols-3">
+                          <p className="flex items-center gap-2 text-[12px] text-[#aaa]"><span className="h-2 w-2 rounded-full bg-white/50" /> Not prepared — start fresh</p>
+                          <p className="flex items-center gap-2 text-[12px] text-[#aaa]"><span className="h-2 w-2 rounded-full bg-[#f59e0b]" /> Partially prepared — keep building</p>
+                          <p className="flex items-center gap-2 text-[12px] text-[#aaa]"><span className="h-2 w-2 rounded-full bg-[#22c55e]" /> Completed — credit your work</p>
+                        </div>
                         <div className="mt-4 max-h-[46dvh] overflow-y-auto pr-1">
-                          <SyllabusChecklist grade={grade} targetExam={targetExam} value={syllabus} onChange={setSyllabus} />
+                          <ChapterPreparationSelector
+                            grade={grade}
+                            targetExam={targetExam}
+                            syllabus={syllabus}
+                            preparation={preparation}
+                            onSyllabusChange={setSyllabus}
+                            onPreparationChange={setPreparation}
+                          />
                         </div>
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                           <GhostButton onClick={() => setStep(2)}>← Back</GhostButton>
-                          <PrimaryButton onClick={() => setStep(4)}>Next: finished work →</PrimaryButton>
+                          <PrimaryButton onClick={() => setStep(4)}>Review starting point →</PrimaryButton>
                         </div>
                       </div>
                     )}
 
-                    {/* ── Step 4 — Backfill ── */}
+                    {/* ── Step 4 — Review ── */}
                     {step === 4 && syllabus && (
                       <div>
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <h2 className="text-[22px] font-semibold tracking-tight">Already finished anything?</h2>
+                            <h2 className="text-[22px] font-semibold tracking-tight">Your prep baseline is set</h2>
                             <p className="mt-1 text-[14px] text-[#999]">
-                              Tap chapters you&apos;ve fully completed — or skip. Everything stays editable.
+                              We&apos;ll use this to make your plan realistic from day one. You can update any chapter later.
                             </p>
                           </div>
-                          {backfillCount > 0 && (
-                            <span className="tnum shrink-0 rounded-full bg-[#22c55e]/10 px-3 py-1.5 font-mono text-[12px] font-bold text-[#4ade80] ring-1 ring-[#22c55e]/25">
-                              {backfillCount} done
-                            </span>
-                          )}
                         </div>
-                        <div className="mt-4 max-h-[42dvh] space-y-3 overflow-y-auto pr-1">
+                        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                          <div className="rounded-[15px] bg-white/[0.055] p-4 ring-1 ring-white/[0.08]">
+                            <p className="font-mono text-[12px] text-[#888]">IN YOUR EXAM</p>
+                            <p className="tnum mt-1 text-[28px] font-semibold">{selectedCount}</p>
+                            <p className="text-[12px] text-[#888]">chapters selected</p>
+                          </div>
+                          <div className="rounded-[15px] bg-[#f59e0b]/[0.08] p-4 ring-1 ring-[#f59e0b]/20">
+                            <p className="font-mono text-[12px] text-[#fbbf24]">PARTIALLY PREPARED</p>
+                            <p className="tnum mt-1 text-[28px] font-semibold text-[#fbbf24]">{preparationCounts.partial}</p>
+                            <p className="text-[12px] text-[#c79d3a]">chapters to build on</p>
+                          </div>
+                          <div className="rounded-[15px] bg-[#22c55e]/[0.08] p-4 ring-1 ring-[#22c55e]/20">
+                            <p className="font-mono text-[12px] text-[#4ade80]">COMPLETED</p>
+                            <p className="tnum mt-1 text-[28px] font-semibold text-[#4ade80]">{preparationCounts.completed}</p>
+                            <p className="text-[12px] text-[#65b982]">chapters credited</p>
+                          </div>
+                        </div>
+                        <div className="mt-4 max-h-[32dvh] space-y-3 overflow-y-auto pr-1">
                           {currentSubjects.map((s) => {
                             const rows = s.groups.flatMap((g) =>
                               g.chapters
@@ -604,11 +657,11 @@ export default function OnboardingPage() {
                                     scopedChapterId(s.id, g.id, ch.id, targetExam || grade)
                                   )
                                 )
-                                .map((ch) => ({ ch }))
+                                .map((ch) => ({ ch, group: g }))
                             );
                             if (rows.length === 0) return null;
-                            const doneInSub = rows.filter(({ ch }) => backfilled[`${s.id}|${ch.id}`]).length;
-                            const allOn = doneInSub === rows.length;
+                            const doneInSub = rows.filter(({ ch }) => getPreparationStatus(preparation, s.id, ch.id) === "completed").length;
+                            const partialInSub = rows.filter(({ ch }) => getPreparationStatus(preparation, s.id, ch.id) === "partially-prepared").length;
                             return (
                               <div
                                 key={s.id}
@@ -618,46 +671,24 @@ export default function OnboardingPage() {
                                   <p className="text-[14px] font-semibold">
                                     {s.name}{" "}
                                     <span className="tnum font-mono text-[12px] font-normal text-[#888]">
-                                      {doneInSub}/{rows.length}
+                                      {doneInSub} complete · {partialInSub} partial
                                     </span>
                                   </p>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      setBackfilled((b) => {
-                                        const next = { ...b };
-                                        for (const { ch } of rows) next[`${s.id}|${ch.id}`] = !allOn;
-                                        return next;
-                                      })
-                                    }
-                                    className="min-h-[36px] rounded-full px-3 text-[12.5px] font-semibold text-[#0099ff] hover:bg-white/[0.06]"
-                                  >
-                                    {allOn ? "Clear" : "Select all"}
-                                  </button>
                                 </div>
                                 <div className="space-y-1.5 px-2 pb-2">
                                   {rows.map(({ ch }) => {
-                                    const key = `${s.id}|${ch.id}`;
-                                    const done = !!backfilled[key];
+                                    const status = getPreparationStatus(preparation, s.id, ch.id);
                                     return (
-                                      <button
-                                        key={key}
-                                        type="button"
-                                        onClick={() => setBackfilled((b) => ({ ...b, [key]: !b[key] }))}
-                                        aria-pressed={done}
-                                        className={`flex min-h-[52px] w-full items-center justify-between gap-3 rounded-[10px] px-3.5 text-left ring-1 transition-all active:scale-[0.99] ${
-                                          done
-                                            ? "bg-white text-black ring-white"
-                                            : "bg-[#1c1c1c] ring-white/[0.06] hover:bg-[#222]"
-                                        }`}
-                                      >
+                                      <div key={ch.id} className="flex min-h-[44px] items-center justify-between gap-3 rounded-[10px] bg-[#1c1c1c] px-3.5 ring-1 ring-white/[0.06]">
                                         <span className="text-[14px] font-medium">
                                           Ch {ch.no}: {ch.name}
                                         </span>
-                                        <span className="shrink-0 text-[13px] font-semibold">
-                                          {done ? "✓ Done" : "Mark"}
+                                        <span className={`shrink-0 text-[12px] font-semibold ${
+                                          status === "completed" ? "text-[#4ade80]" : status === "partially-prepared" ? "text-[#fbbf24]" : "text-[#888]"
+                                        }`}>
+                                          {status === "completed" ? "Completed" : status === "partially-prepared" ? "Partially prepared" : "Not prepared"}
                                         </span>
-                                      </button>
+                                      </div>
                                     );
                                   })}
                                 </div>
@@ -666,8 +697,8 @@ export default function OnboardingPage() {
                           })}
                         </div>
                         <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                          <GhostButton onClick={() => finish(false)}>Skip &amp; finish</GhostButton>
-                          <PrimaryButton onClick={() => finish(true)}>Start tracking →</PrimaryButton>
+                          <GhostButton onClick={() => setStep(3)}>← Edit chapters</GhostButton>
+                          <PrimaryButton onClick={finish}>Start tracking →</PrimaryButton>
                         </div>
                       </div>
                     )}
