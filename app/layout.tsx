@@ -4,6 +4,7 @@ import { assetUrl } from "../lib/site";
 import SwRegister from "../components/sw-register";
 import CursorExclusion from "./CursorExclusion";
 import ThemeInitializer from "../components/theme-initializer";
+import DeveloperShortcut from "../components/dev/DeveloperShortcut";
 import "./globals.css";
 
 const inter = Inter({
@@ -74,6 +75,7 @@ export default function RootLayout(props: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col bg-[#090909] text-white">
         <ThemeInitializer />
+        <DeveloperShortcut />
         {props.children}
         <SwRegister />
         <CursorExclusion />

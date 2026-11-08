@@ -9,6 +9,7 @@ import { getSubjects, getSubjectsForProfile } from "../../../lib/chapters";
 import { celebrate } from "../../../lib/celebrate";
 import { Card, EmptyNotice, Pill, PrimaryButton } from "../../../components/tracker-ui";
 import { Reveal } from "../../../lib/motion";
+import StudyPlanning from "../../../components/study-planning";
 
 type Filter = "open" | "done" | "all";
 
@@ -35,7 +36,7 @@ export default function TodoPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-2xl space-y-4">
+    <div className="mx-auto w-full max-w-6xl space-y-4">
       <Reveal>
         <div>
           <h1 className="display-tight text-[30px] sm:text-[38px]">To-do list</h1>
@@ -46,6 +47,8 @@ export default function TodoPage() {
           </p>
         </div>
       </Reveal>
+
+      <StudyPlanning />
 
       <Reveal>
         <Card>
@@ -136,11 +139,14 @@ export default function TodoPage() {
                 </button>
                 <div className="min-w-0 flex-1">
                   <p className={`text-[14.5px] font-medium break-words ${t.done ? "text-[#666] line-through" : ""}`}>
+                    {t.kind === "test" && <span className="mr-2 text-[12px] font-semibold text-[#fbbf24]">TEST</span>}
                     {t.text}
                   </p>
-                  {subName(t.subjectId) && (
-                    <p className="mt-0.5 text-[12.5px] text-[#0099ff]">{subName(t.subjectId)}</p>
-                  )}
+                  <p className="mt-0.5 text-[12.5px] text-[#0099ff]">
+                    {subName(t.subjectId) ?? "General"}
+                    {t.dueDate && ` · ${new Date(`${t.dueDate}T12:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`}
+                    {` · ${t.priority === "high" ? "High priority" : t.priority === "low" ? "Low priority" : "Medium priority"}`}
+                  </p>
                 </div>
                 <button
                   type="button"

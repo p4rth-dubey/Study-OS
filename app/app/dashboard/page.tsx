@@ -14,6 +14,7 @@ import { celebrate } from "../../../lib/celebrate";
 import { Card, CircleChart, EmptyNotice, PrimaryButton, SpotCard, StatusTag } from "../../../components/tracker-ui";
 import { getDailyQuote } from "../../../lib/quotes";
 import ThemeSwitcher from "../../../components/theme-switcher";
+import FounderBadge from "../../../components/dev/FounderBadge";
 
 export default function DashboardPage() {
   const store = useTracker();
@@ -174,6 +175,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+              <FounderBadge small />
               <span className="text-[11px] font-mono text-[#666] uppercase tracking-wider hidden md:inline">Theme</span>
               <ThemeSwitcher compact />
             </div>

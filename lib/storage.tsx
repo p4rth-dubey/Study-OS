@@ -40,6 +40,10 @@ export interface Todo {
   subjectId: string | null;
   done: boolean;
   createdAt: string;
+  /** Optional planning metadata. Older saved to-dos remain fully compatible. */
+  kind?: "task" | "test";
+  priority?: "high" | "medium" | "low";
+  dueDate?: string;
 }
 
 export interface Profile {
@@ -52,6 +56,7 @@ export interface Profile {
   progress: Record<string, ChapterProgress>;
   streak: Streak;
   todos?: Todo[];
+  plannerDays?: Record<string, "holiday" | "festival">;
   weeklyGoal?: number;
   needsSyllabusConfirmation?: boolean;
   v5NoticeNeeded?: boolean;
@@ -208,10 +213,15 @@ export interface Store {
   cycleStage: (subjectId: string, chapterId: string, stageKey: StageKey) => void;
   touchStage: (subjectId: string, chapterId: string, stageKey: StageKey) => void;
   setWeeklyGoal: (n: number) => void;
-  addTodo: (text: string, subjectId: string | null) => void;
+  addTodo: (
+    text: string,
+    subjectId: string | null,
+    options?: Pick<Todo, "kind" | "priority" | "dueDate">,
+  ) => void;
   toggleTodo: (id: string) => void;
   deleteTodo: (id: string) => void;
   clearDoneTodos: () => void;
+  setPlannerDay: (date: string, type: "holiday" | "festival" | null) => void;
   backfill: (subjectId: string, chapterIds: string[], done: boolean) => void;
   backfillState: (subjectId: string, chapterIds: string[], state: StageState) => void;
   dismissNotice: (key: "v5NoticeNeeded" | "v6PreResourceNoticeNeeded" | "needsSyllabusConfirmation") => void;
@@ -375,7 +385,7 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
         });
       },
 
-      addTodo: (text, subjectId) => {
+      addTodo: (text, subjectId, options) => {
         if (!profile) return;
         const clean = text.trim().slice(0, 140);
         if (!clean) return;
@@ -385,6 +395,9 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
           subjectId,
           done: false,
           createdAt: new Date().toISOString(),
+          kind: options?.kind ?? "task",
+          priority: options?.priority ?? "medium",
+          dueDate: options?.dueDate,
         };
         const updated = { ...profile, todos: [...(profile.todos ?? []), todo] };
         commit({
@@ -417,6 +430,18 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
       clearDoneTodos: () => {
         if (!profile) return;
         const updated = { ...profile, todos: (profile.todos ?? []).filter((t) => !t.done) };
+        commit({
+          ...state,
+          profiles: state.profiles.map((p) => (p.id === profile.id ? updated : p)),
+        });
+      },
+
+      setPlannerDay: (date, type) => {
+        if (!profile) return;
+        const plannerDays = { ...(profile.plannerDays ?? {}) };
+        if (type) plannerDays[date] = type;
+        else delete plannerDays[date];
+        const updated = { ...profile, plannerDays };
         commit({
           ...state,
           profiles: state.profiles.map((p) => (p.id === profile.id ? updated : p)),
