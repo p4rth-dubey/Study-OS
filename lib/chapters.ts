@@ -134,6 +134,99 @@ const CLASS_10: Subject[] = [
       },
     ],
   },
+  {
+    id: "english",
+    name: "English",
+    examKey: "english",
+    groups: [
+      {
+        id: "first_flight_prose",
+        name: "First Flight — Prose",
+        chapters: [
+          { id: "ff_ch1", no: 1, name: "A Letter to God" },
+          { id: "ff_ch2", no: 2, name: "Nelson Mandela: Long Walk to Freedom" },
+          { id: "ff_ch3", no: 3, name: "Two Stories about Flying" },
+          { id: "ff_ch4", no: 4, name: "From the Diary of Anne Frank" },
+          { id: "ff_ch5", no: 5, name: "Glimpses of India" },
+          { id: "ff_ch6", no: 6, name: "Mijbil the Otter" },
+          { id: "ff_ch7", no: 7, name: "Madam Rides the Bus" },
+          { id: "ff_ch8", no: 8, name: "The Sermon at Benares" },
+          { id: "ff_ch9", no: 9, name: "The Proposal" },
+        ],
+      },
+      {
+        id: "first_flight_poetry",
+        name: "First Flight — Poetry",
+        chapters: [
+          { id: "ff_p1", no: 1, name: "Dust of Snow" },
+          { id: "ff_p2", no: 2, name: "Fire and Ice" },
+          { id: "ff_p3", no: 3, name: "A Tiger in the Zoo" },
+          { id: "ff_p4", no: 4, name: "How to Tell Wild Animals" },
+          { id: "ff_p5", no: 5, name: "The Ball Poem" },
+          { id: "ff_p6", no: 6, name: "Amanda!" },
+          { id: "ff_p7", no: 7, name: "The Trees" },
+          { id: "ff_p8", no: 8, name: "Fog" },
+          { id: "ff_p9", no: 9, name: "The Tale of Custard the Dragon" },
+          { id: "ff_p10", no: 10, name: "For Anne Gregory" },
+        ],
+      },
+      {
+        id: "footprints",
+        name: "Footprints without Feet",
+        chapters: [
+          { id: "fp_ch1", no: 1, name: "A Triumph of Surgery" },
+          { id: "fp_ch2", no: 2, name: "The Thief's Story" },
+          { id: "fp_ch3", no: 3, name: "The Midnight Visitor" },
+          { id: "fp_ch4", no: 4, name: "A Question of Trust" },
+          { id: "fp_ch5", no: 5, name: "Footprints without Feet" },
+          { id: "fp_ch6", no: 6, name: "The Making of a Scientist" },
+          { id: "fp_ch7", no: 7, name: "The Necklace" },
+          { id: "fp_ch8", no: 8, name: "Bholi" },
+          { id: "fp_ch9", no: 9, name: "The Book that Saved the Earth" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "hindi",
+    name: "Hindi",
+    examKey: "hindi",
+    groups: [
+      {
+        id: "kshitij_kavya",
+        name: "क्षितिज भाग-2 — काव्य खंड",
+        chapters: [
+          { id: "hin_k1", no: 1, name: "सूरदास – पद" },
+          { id: "hin_k2", no: 2, name: "तुलसीदास – राम-लक्ष्मण-परशुराम संवाद" },
+          { id: "hin_k3", no: 3, name: "जयशंकर प्रसाद – आत्मकथ्य" },
+          { id: "hin_k4", no: 4, name: "सूर्यकांत त्रिपाठी 'निराला' – उत्साह और अट नहीं रही है" },
+          { id: "hin_k5", no: 5, name: "नागार्जुन – यह दंतुरित मुसकान और फसल" },
+          { id: "hin_k6", no: 6, name: "मंगलेश डबराल – संगतकार" },
+        ],
+      },
+      {
+        id: "kshitij_gadya",
+        name: "क्षितिज भाग-2 — गद्य खंड",
+        chapters: [
+          { id: "hin_g1", no: 1, name: "स्वयं प्रकाश – नेताजी का चश्मा" },
+          { id: "hin_g2", no: 2, name: "रामवृक्ष बेनीपुरी – बालगोबिन भगत" },
+          { id: "hin_g3", no: 3, name: "यशपाल – लखनवी अंदाज़" },
+          { id: "hin_g4", no: 4, name: "मन्नू भंडारी – एक कहानी यह भी" },
+          { id: "hin_g5", no: 5, name: "यतींद्र मिश्र – नौबतखाने में इबादत" },
+          { id: "hin_g6", no: 6, name: "भदंत आनंद कौसल्यायन – संस्कृति" },
+        ],
+      },
+      {
+        id: "kritika",
+        name: "कृतिका भाग-2",
+        chapters: [
+          { id: "hin_kr1", no: 1, name: "शिवपूजन सहाय – माता का आँचल" },
+          { id: "hin_kr2", no: 2, name: "मधु कांकरिया – साना-साना हाथ जोड़ि…" },
+          { id: "hin_kr3", no: 3, name: "अज्ञेय – मैं क्यों लिखता हूँ?" },
+        ],
+      },
+    ],
+  },
 ];
 
 const CLASS_9: Subject[] = [
@@ -224,6 +317,97 @@ const CLASS_9: Subject[] = [
         chapters: [
           { id: "ch8", no: 8, name: "Building Blocks in Economics: The Problem of Choice" },
           { id: "ch9", no: 9, name: "The Price Puzzle: What Drives the Market" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "english",
+    name: "English",
+    examKey: "english",
+    groups: [
+      {
+        id: "beehive_prose",
+        name: "Beehive — Prose",
+        chapters: [
+          { id: "bh_ch1", no: 1, name: "The Fun They Had" },
+          { id: "bh_ch2", no: 2, name: "The Sound of Music" },
+          { id: "bh_ch3", no: 3, name: "The Little Girl" },
+          { id: "bh_ch4", no: 4, name: "A Truly Beautiful Mind" },
+          { id: "bh_ch5", no: 5, name: "The Snake and the Mirror" },
+          { id: "bh_ch6", no: 6, name: "My Childhood" },
+          { id: "bh_ch7", no: 7, name: "Reach for the Top" },
+          { id: "bh_ch8", no: 8, name: "Kathmandu" },
+          { id: "bh_ch9", no: 9, name: "If I Were You" },
+        ],
+      },
+      {
+        id: "beehive_poetry",
+        name: "Beehive — Poetry",
+        chapters: [
+          { id: "bh_p1", no: 1, name: "The Road Not Taken" },
+          { id: "bh_p2", no: 2, name: "Wind" },
+          { id: "bh_p3", no: 3, name: "Rain on the Roof" },
+          { id: "bh_p4", no: 4, name: "The Lake Isle of Innisfree" },
+          { id: "bh_p5", no: 5, name: "A Legend of the Northland" },
+          { id: "bh_p6", no: 6, name: "No Men Are Foreign" },
+          { id: "bh_p7", no: 7, name: "On Killing a Tree" },
+          { id: "bh_p8", no: 8, name: "A Slumber Did My Spirit Seal" },
+        ],
+      },
+      {
+        id: "moments",
+        name: "Moments (Supplementary)",
+        chapters: [
+          { id: "mo_ch1", no: 1, name: "The Lost Child" },
+          { id: "mo_ch2", no: 2, name: "The Adventures of Toto" },
+          { id: "mo_ch3", no: 3, name: "Iswaran the Storyteller" },
+          { id: "mo_ch4", no: 4, name: "In the Kingdom of Fools" },
+          { id: "mo_ch5", no: 5, name: "The Happy Prince" },
+          { id: "mo_ch6", no: 6, name: "The Last Leaf" },
+          { id: "mo_ch7", no: 7, name: "A House is Not a Home" },
+          { id: "mo_ch8", no: 8, name: "The Beggar" },
+        ],
+      },
+    ],
+  },
+  {
+    id: "hindi",
+    name: "Hindi",
+    examKey: "hindi",
+    groups: [
+      {
+        id: "kshitij_gadya_9",
+        name: "क्षितिज भाग-1 — गद्य खंड",
+        chapters: [
+          { id: "hin9_g1", no: 1, name: "प्रेमचंद – दो बैलों की कथा" },
+          { id: "hin9_g2", no: 2, name: "राहुल सांकृत्यायन – ल्हासा की ओर" },
+          { id: "hin9_g3", no: 3, name: "श्यामाचरण दुबे – उपभोक्तावाद की संस्कृति" },
+          { id: "hin9_g4", no: 4, name: "जाबिर हुसैन – साँवले सपनों की याद" },
+          { id: "hin9_g5", no: 5, name: "हरिशंकर परसाई – प्रेमचंद के फटे जूते" },
+          { id: "hin9_g6", no: 6, name: "महादेवी वर्मा – मेरे बचपन के दिन" },
+        ],
+      },
+      {
+        id: "kshitij_kavya_9",
+        name: "क्षितिज भाग-1 — काव्य खंड",
+        chapters: [
+          { id: "hin9_k1", no: 1, name: "कबीर – साखियाँ एवं सबद" },
+          { id: "hin9_k2", no: 2, name: "ललद्यद – वाख" },
+          { id: "hin9_k3", no: 3, name: "रसखान – सवैये" },
+          { id: "hin9_k4", no: 4, name: "माखनलाल चतुर्वेदी – कैदी और कोकिला" },
+          { id: "hin9_k5", no: 5, name: "सुमित्रानंदन पंत – ग्राम श्री" },
+          { id: "hin9_k6", no: 6, name: "सर्वेश्वर दयाल सक्सेना – मेघ आए" },
+          { id: "hin9_k7", no: 7, name: "राजेश जोशी – बच्चे काम पर जा रहे हैं" },
+        ],
+      },
+      {
+        id: "kritika_9",
+        name: "कृतिका भाग-1",
+        chapters: [
+          { id: "hin9_kr1", no: 1, name: "फणीश्वरनाथ रेणु – इस जल प्रलय में" },
+          { id: "hin9_kr2", no: 2, name: "मृदुला गर्ग – मेरे संग की औरतें" },
+          { id: "hin9_kr3", no: 3, name: "जगदीश चंद्र माथुर – रीढ़ की हड्डी" },
         ],
       },
     ],
@@ -699,6 +883,12 @@ export const CLASS_10_RESOURCES: Record<string, PdfResource[]> = {
   sst: [
     { title: "Competency Focused Practice Questions — Vol 1", path: "/pdfs/class10/sst/cfpq-vol1.pdf" },
     { title: "Competency Focused Practice Questions — Vol 2", path: "/pdfs/class10/sst/cfpq-vol2.pdf" },
+  ],
+  english: [
+    { title: "Competency Focused Practice Questions — English Vol 1", path: "/pdfs/class10/sst/cfpq-vol1.pdf" },
+  ],
+  hindi: [
+    { title: "Competency Focused Practice Questions — Hindi Vol 1", path: "/pdfs/class10/sst/cfpq-vol1.pdf" },
   ],
 };
 

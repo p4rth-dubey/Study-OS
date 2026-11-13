@@ -57,6 +57,26 @@ export const EXAM_REGISTRY: Record<string, ExamConfig> = {
           { id: "sst-4", name: "Economics: Choice, Markets & Prices" },
         ],
       },
+      {
+        id: "english",
+        name: "English Language & Literature",
+        topics: [
+          { id: "eng-1", name: "Beehive: Prose (The Fun They Had, Sound of Music, Kalam)" },
+          { id: "eng-2", name: "Beehive: Poetry (Road Not Taken, Wind, Rain on Roof)" },
+          { id: "eng-3", name: "Moments: Supplementary (Lost Child, Toto, Iswaran)" },
+          { id: "eng-4", name: "Reading Comprehension & Creative Writing Skills" },
+        ],
+      },
+      {
+        id: "hindi",
+        name: "Hindi (Course A)",
+        topics: [
+          { id: "hin-1", name: "क्षितिज भाग-1: गद्य खंड (दो बैलों की कथा, ल्हासा की ओर)" },
+          { id: "hin-2", name: "क्षितिज भाग-1: काव्य खंड (साखियाँ, वाख, सवैये, कैदी और कोकिला)" },
+          { id: "hin-3", name: "कृतिका भाग-1: पूरक पाठ्यपुस्तक (इस जल प्रलय में, रीढ़ की हड्डी)" },
+          { id: "hin-4", name: "व्याकरण एवं रचनात्मक लेखन" },
+        ],
+      },
     ],
     questionFormats: ["mcq_single", "assertion_reason", "descriptive"],
     markingRules: {
@@ -138,6 +158,26 @@ export const EXAM_REGISTRY: Record<string, ExamConfig> = {
           { id: "geo", name: "Geography: Resources, Agriculture, Minerals, Manufacturing" },
           { id: "civics", name: "Political Science: Power Sharing, Federalism, Parties" },
           { id: "eco", name: "Economics: Development, Sectors, Money & Credit" },
+        ],
+      },
+      {
+        id: "english",
+        name: "English Language & Literature",
+        topics: [
+          { id: "eng-1", name: "First Flight: Prose (Letter to God, Mandela, Anne Frank)" },
+          { id: "eng-2", name: "First Flight: Poetry (Dust of Snow, Fire & Ice, Amanda)" },
+          { id: "eng-3", name: "Footprints without Feet (Triumph of Surgery, Thief's Story, Bholi)" },
+          { id: "eng-4", name: "Reading Comprehension, Grammar & Analytical Paragraph" },
+        ],
+      },
+      {
+        id: "hindi",
+        name: "Hindi (Course A)",
+        topics: [
+          { id: "hin-1", name: "क्षितिज भाग-2: काव्य खंड (सूरदास पद, राम-लक्ष्मण संवाद, आत्मकथ्य)" },
+          { id: "hin-2", name: "क्षितिज भाग-2: गद्य खंड (नेताजी का चश्मा, बालगोबिन भगत, लखनवी अंदाज़)" },
+          { id: "hin-3", name: "कृतिका भाग-2: पूरक पाठ्यपुस्तक (माता का आँचल, साना साना हाथ जोड़ि)" },
+          { id: "hin-4", name: "व्याकरण, अनुच्छेद लेखन एवं औपचारिक पत्र" },
         ],
       },
     ],

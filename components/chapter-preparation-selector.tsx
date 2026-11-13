@@ -74,10 +74,13 @@ export default function ChapterPreparationSelector({
         ).length;
         const isCollapsed = collapsed[subject.id];
         const allIncluded = includedCount === allChapters.length;
+        const allCompleted = allChapters.length > 0 && allChapters.every(({ chapter, scopedId }) =>
+          selected.includes(scopedId) && getPreparationStatus(preparation, subject.id, chapter.id) === "completed"
+        );
 
         return (
           <section key={subject.id} className="overflow-hidden rounded-[14px] bg-[#1c1c1c]/70 ring-1 ring-white/[0.07]">
-            <div className="flex min-h-[58px] items-center gap-3 px-4">
+            <div className="flex min-h-[58px] items-center gap-2 px-4">
               <button
                 type="button"
                 onClick={() => setCollapsed((current) => ({ ...current, [subject.id]: !current[subject.id] }))}
@@ -91,8 +94,25 @@ export default function ChapterPreparationSelector({
               </button>
               <button
                 type="button"
+                onClick={() => {
+                  const allScopedIds = allChapters.map(({ scopedId }) => scopedId);
+                  const newPrep = { ...preparation };
+                  for (const { chapter } of allChapters) {
+                    newPrep[`${subject.id}|${chapter.id}`] = allCompleted ? "not-prepared" : "completed";
+                  }
+                  onPreparationChange(newPrep);
+                  if (!allCompleted) {
+                    onSyllabusChange({ ...syllabus, [subject.id]: allScopedIds });
+                  }
+                }}
+                className="min-h-[36px] shrink-0 rounded-full px-2.5 text-[11.5px] font-semibold text-[#4ade80] transition-colors hover:bg-white/[0.06]"
+              >
+                {allCompleted ? "Reset completed" : "All completed"}
+              </button>
+              <button
+                type="button"
                 onClick={() => setSubjectIncluded(subject.id, allChapters.map(({ scopedId }) => scopedId), !allIncluded)}
-                className="min-h-[36px] shrink-0 rounded-full px-3 text-[12px] font-semibold text-[#0099ff] transition-colors hover:bg-white/[0.06]"
+                className="min-h-[36px] shrink-0 rounded-full px-2.5 text-[11.5px] font-semibold text-[#0099ff] transition-colors hover:bg-white/[0.06]"
               >
                 {allIncluded ? "Clear" : "All chapters"}
               </button>
@@ -145,7 +165,12 @@ export default function ChapterPreparationSelector({
                                     key={option.value}
                                     type="button"
                                     aria-pressed={active}
-                                    onClick={() => onPreparationChange({ ...preparation, [`${subject.id}|${chapter.id}`]: option.value })}
+                                    onClick={() => {
+                                      onPreparationChange({ ...preparation, [`${subject.id}|${chapter.id}`]: option.value });
+                                      if (!included && (option.value === "completed" || option.value === "partially-prepared")) {
+                                        toggleChapter(subject.id, scopedId);
+                                      }
+                                    }}
                                     className={`min-h-[36px] rounded-[9px] px-2 text-[11.5px] font-semibold ring-1 transition-all active:scale-[0.98] ${
                                       active ? option.activeClass : "bg-white/[0.035] text-[#888] ring-white/[0.08] hover:bg-white/[0.07] hover:text-[#ccc]"
                                     }`}

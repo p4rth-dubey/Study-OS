@@ -15,8 +15,9 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { gsap } from "gsap";
-import { useTracker, type Datesheet } from "../../../lib/storage";
+import { useTracker, type Datesheet, type ChapterProgress } from "../../../lib/storage";
 import { getSubjectsForProfile, scopedChapterId } from "../../../lib/chapters";
+import { getStageKeys } from "../../../lib/stages";
 import {
   Card,
   DateField,
@@ -42,8 +43,8 @@ const STEPS = [
 ];
 
 export const EXAM_GOALS = [
-  { id: "cbse-10", grade: 10, title: "CBSE Class 10", subtitle: "Science, Maths, Social Science", tag: "School Board" },
-  { id: "cbse-9", grade: 9, title: "CBSE Class 9", subtitle: "Science, Maths, Social Science", tag: "School Prep" },
+  { id: "cbse-10", grade: 10, title: "CBSE Class 10", subtitle: "Science, Maths, SST, English, Hindi", tag: "School Board" },
+  { id: "cbse-9", grade: 9, title: "CBSE Class 9", subtitle: "Science, Maths, SST, English, Hindi", tag: "School Prep" },
   { id: "jee-main", grade: 12, title: "JEE Main / Advanced", subtitle: "Physics, Chemistry, Mathematics", tag: "Engineering" },
   { id: "neet-ug", grade: 12, title: "NEET-UG", subtitle: "Biology, Physics, Chemistry", tag: "Medical" },
   { id: "upsc-cse", grade: 12, title: "UPSC Civil Services", subtitle: "GS Paper 1, CSAT & Current Affairs", tag: "Civil Services" },
@@ -178,7 +179,7 @@ export default function OnboardingPage() {
   const [name, setName] = useState("");
   const [targetExam, setTargetExam] = useState<string>("cbse-10");
   const [grade, setGrade] = useState(10);
-  const [datesheet, setDatesheet] = useState<Datesheet>({ science: "", maths: "", sst: "" });
+  const [datesheet, setDatesheet] = useState<Datesheet>({ science: "", maths: "", sst: "", english: "", hindi: "" });
   const [syllabus, setSyllabus] = useState<Record<string, string[]> | null>(null);
   const [preparation, setPreparation] = useState<Record<string, PreparationStatus>>({});
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -229,34 +230,53 @@ export default function OnboardingPage() {
   };
 
   const finish = () => {
-    store.createProfile({
-      name: name.trim() || user?.name || "Student",
-      grade,
-      targetExam,
-      datesheet,
-      examSyllabus: syllabus,
-    });
+    const stageKeys = getStageKeys(targetExam || grade);
+    const now = new Date().toISOString();
+    const initialProgress: Record<string, ChapterProgress> = {};
     const partialBySubject: Record<string, string[]> = {};
     const completeBySubject: Record<string, string[]> = {};
+
     for (const subject of currentSubjects) {
       for (const group of subject.groups) {
         for (const chapter of group.chapters) {
           const scopedId = scopedChapterId(subject.id, group.id, chapter.id, targetExam || grade);
           if (!(syllabus?.[subject.id] ?? []).includes(scopedId)) continue;
           const status = getPreparationStatus(preparation, subject.id, chapter.id);
-          if (status === "partially-prepared") {
-            (partialBySubject[subject.id] = partialBySubject[subject.id] ?? []).push(chapter.id);
-          }
           if (status === "completed") {
             (completeBySubject[subject.id] = completeBySubject[subject.id] ?? []).push(chapter.id);
+            const cur: ChapterProgress = { updatedAt: now };
+            for (const sk of stageKeys) cur[sk] = "done";
+            initialProgress[`${subject.id}.${chapter.id}`] = cur;
+            if (scopedId !== chapter.id) {
+              initialProgress[`${subject.id}.${scopedId}`] = cur;
+            }
+          } else if (status === "partially-prepared") {
+            (partialBySubject[subject.id] = partialBySubject[subject.id] ?? []).push(chapter.id);
+            const cur: ChapterProgress = { updatedAt: now };
+            for (const sk of stageKeys) cur[sk] = "progress";
+            initialProgress[`${subject.id}.${chapter.id}`] = cur;
+            if (scopedId !== chapter.id) {
+              initialProgress[`${subject.id}.${scopedId}`] = cur;
+            }
           }
         }
       }
     }
+
+    store.createProfile({
+      name: name.trim() || user?.name || "Student",
+      grade,
+      targetExam,
+      datesheet,
+      examSyllabus: syllabus,
+      progress: initialProgress,
+    });
+
     for (const [subjectId, chapterIds] of Object.entries(partialBySubject))
       store.backfillState(subjectId, chapterIds, "progress");
     for (const [subjectId, chapterIds] of Object.entries(completeBySubject))
       store.backfillState(subjectId, chapterIds, "done");
+
     celebrate("goal");
     router.replace("/app/dashboard");
   };

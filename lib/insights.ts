@@ -29,8 +29,6 @@ export interface FinishForecast {
   onTrack: boolean;
 }
 
-/** Projected finish date from actual 7-day pace vs remaining work.
- * Falls back to required pace when the student hasn't logged a week yet. */
 export function forecastFinish(
   profile: Profile,
   subject: Subject,
@@ -48,7 +46,7 @@ export function forecastFinish(
   const exam = a.examDate ? new Date(a.examDate + "T12:00:00") : null;
   return {
     finishDate: d.toISOString().split("T")[0],
-    finishLabel: label,
+    finishLabel: label, 
     onTrack: exam ? d <= exam : true,
   };
 }

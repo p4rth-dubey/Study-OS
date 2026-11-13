@@ -222,7 +222,10 @@ test("Curriculum personalization engine maps authentic subjects for JEE, NEET, U
   assert(neetSubs.reduce((acc, s) => acc + s.groups.reduce((gacc, g) => gacc + g.chapters.length, 0), 0) >= 40, "NEET should have extensive chapters");
 
   const cbseSubs = getSubjectsForProfile({ targetExam: "cbse-10", grade: 10 });
-  assert.deepStrictEqual(cbseSubs.map(s => s.id), ["science", "maths", "sst"], "CBSE 10 must have Science, Maths, SST");
+  assert.deepStrictEqual(cbseSubs.map(s => s.id), ["science", "maths", "sst", "english", "hindi"], "CBSE 10 must have Science, Maths, SST, English, Hindi");
+
+  const cbse9Subs = getSubjectsForProfile({ targetExam: "cbse-9", grade: 9 });
+  assert.deepStrictEqual(cbse9Subs.map(s => s.id), ["science", "maths", "sst", "english", "hindi"], "CBSE 9 must have Science, Maths, SST, English, Hindi");
 
   const upscSubs = getSubjectsForProfile({ targetExam: "upsc-cse", grade: 12 });
   assert.deepStrictEqual(upscSubs.map(s => s.id), ["gs-paper-1", "csat-paper-2"], "UPSC must have GS-1 and CSAT");

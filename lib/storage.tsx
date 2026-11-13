@@ -21,6 +21,7 @@ export interface Datesheet {
   quant?: string;
   reasoning?: string;
   english?: string;
+  hindi?: string;
   awareness?: string;
   [key: string]: string | undefined;
 }
@@ -196,6 +197,7 @@ export interface Draft {
   targetExam?: string;
   datesheet: Datesheet;
   examSyllabus: Record<string, string[]> | null;
+  progress?: Record<string, ChapterProgress>;
 }
 
 export interface Store {
@@ -276,7 +278,7 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
           targetExam,
           datesheet: d.datesheet,
           examSyllabus: d.examSyllabus ?? defaultSyllabus(targetExam),
-          progress: {},
+          progress: d.progress ?? {},
           streak: { count: 1, lastActive: todayString() },
         };
         next.profiles.push(p);
@@ -449,21 +451,25 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
       },
 
       backfill: (subjectId, chapterIds, done) => {
-        if (!profile) return;
+        const targetProfile =
+          state.profiles.find((p) => p.id === state.activeProfileId) ??
+          state.profiles[0] ??
+          profile;
+        if (!targetProfile) return;
         const stateForAllStages: StageState = done ? "done" : "none";
-        const keys = getStageKeys(profile.targetExam || profile.grade);
-        const progress = { ...profile.progress };
+        const keys = getStageKeys(targetProfile.targetExam || targetProfile.grade);
+        const progress = { ...targetProfile.progress };
         for (const chId of chapterIds) {
           const cur: ChapterProgress = { ...(progress[`${subjectId}.${chId}`] ?? {}) };
           for (const sk of keys) cur[sk] = stateForAllStages;
           cur.updatedAt = new Date().toISOString();
           progress[`${subjectId}.${chId}`] = cur;
         }
-        const updated: Profile = { ...profile, progress };
+        const updated: Profile = { ...targetProfile, progress };
         touchStreak(updated);
         commit({
           ...state,
-          profiles: state.profiles.map((p) => (p.id === profile.id ? updated : p)),
+          profiles: state.profiles.map((p) => (p.id === targetProfile.id ? updated : p)),
         });
       },
 
@@ -472,20 +478,24 @@ export function TrackerProvider({ children }: { children: React.ReactNode }) {
        * for every stage. The existing boolean backfill API remains intact for
        * older callers. */
       backfillState: (subjectId, chapterIds, stateForAllStages) => {
-        if (!profile) return;
-        const keys = getStageKeys(profile.targetExam || profile.grade);
-        const progress = { ...profile.progress };
+        const targetProfile =
+          state.profiles.find((p) => p.id === state.activeProfileId) ??
+          state.profiles[0] ??
+          profile;
+        if (!targetProfile) return;
+        const keys = getStageKeys(targetProfile.targetExam || targetProfile.grade);
+        const progress = { ...targetProfile.progress };
         for (const chId of chapterIds) {
           const cur: ChapterProgress = { ...(progress[`${subjectId}.${chId}`] ?? {}) };
           for (const sk of keys) cur[sk] = stateForAllStages;
           cur.updatedAt = new Date().toISOString();
           progress[`${subjectId}.${chId}`] = cur;
         }
-        const updated: Profile = { ...profile, progress };
+        const updated: Profile = { ...targetProfile, progress };
         touchStreak(updated);
         commit({
           ...state,
-          profiles: state.profiles.map((p) => (p.id === profile.id ? updated : p)),
+          profiles: state.profiles.map((p) => (p.id === targetProfile.id ? updated : p)),
         });
       },
 

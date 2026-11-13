@@ -46,6 +46,22 @@ const LABELS_BY_SUBJECT: Record<string, Partial<Record<StageKey, string>>> = {
   history: { theory: "Historical Sources & Themes", ncert: "NCERT Text Questions", pyq: "Source-based PYQs" },
   polscience: { theory: "Political Concepts & Articles", ncert: "NCERT Exercises", pyq: "Cartoon & Passage PYQs" },
   geography: { theory: "Map Work & Physical Concepts", ncert: "NCERT Chapter Questions", pyq: "Map & Theory PYQs" },
+  english: {
+    theory: "Text Reading & Theme",
+    ncert: "NCERT Q&A & Analysis",
+    exemplar: "Grammar & Writing Tasks",
+    pyq: "Board Exam Questions",
+    cbq: "Extract-based / RTCs",
+    revision: "Quick Revision",
+  },
+  hindi: {
+    theory: "पाठ पाठन एवं भावार्थ",
+    ncert: "अभ्यास प्रश्नोत्तर",
+    exemplar: "व्याकरण एवं रचनात्मक लेखन",
+    pyq: "विगत वर्ष के प्रश्न (PYQs)",
+    cbq: "पठित / अपठित गद्यांश-पद्यांश प्रश्न",
+    revision: "पुनरावृत्ति (Revision)",
+  },
   "gs-paper-1": { theory: "Standard Books & Notes", pyq: "UPSC 25-Year PYQs", revision: "Current Affairs Linking" },
   default: {
     theory: "Theory Read",

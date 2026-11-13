@@ -196,6 +196,81 @@ const AUTHENTIC_SUBJECT_PROBLEMS: Record<
       source: "NCERT Political Science & CBSE Board Question Bank",
     },
   ],
+  english: [
+    {
+      q: "In the poem 'Dust of Snow' by Robert Frost, what did the hemlock tree and the crow traditionally symbolize, and how did they affect the poet's mood?",
+      options: [
+        { id: "A", text: "Joy and prosperity; they made him forget his work" },
+        { id: "B", text: "Ill omen and sorrow; yet they unexpectedly uplifted his gloomy mood" },
+        { id: "C", text: "Fear and trepidation; they compelled him to return home" },
+        { id: "D", text: "Spring and rebirth; they reminded him of childhood memories" },
+      ],
+      ans: "B",
+      steps: [
+        "A hemlock tree is a poisonous plant with small white flowers, and a crow is an ominous black bird associated with gloom and death.",
+        "Despite both being symbols of sadness, the falling snow from the tree unexpectedly saved the day that the poet had regretted.",
+        "This portrays nature's profound healing power through unconventionally auspicious symbols.",
+      ],
+      explanation: "Frost inverts conventional poetic imagery: the crow and poisonous hemlock tree bring about a positive change of heart, saving the remaining part of a ruined day.",
+      topicName: "Dust of Snow (Poetry)",
+      source: "CBSE Class 10 First Flight & Board Question Archive",
+    },
+    {
+      q: "Fill in the blank with the grammatically appropriate modal: 'Every citizen ______ abide by the fundamental duties enshrined in the Indian Constitution.'",
+      options: [
+        { id: "A", text: "may" },
+        { id: "B", text: "ought to" },
+        { id: "C", text: "could" },
+        { id: "D", text: "might" },
+      ],
+      ans: "B",
+      steps: [
+        "'Ought to' expresses moral obligation, duty, or strong recommendation.",
+        "'May' expresses permission or possibility.",
+        "'Could' and 'might' express past ability or remote possibility.",
+      ],
+      explanation: "'Ought to' is the standard modal used to express civic and moral duties.",
+      topicName: "Modals & Integrated Grammar",
+      source: "CBSE Class 9 & 10 Grammar & Composition",
+    },
+  ],
+  hindi: [
+    {
+      q: "सूरदास के पद में गोपियों ने उद्धव के योग संदेश की तुलना किस वस्तु से की है?",
+      options: [
+        { id: "A", text: "मीठे फल से" },
+        { id: "B", text: "कड़वी ककड़ी से" },
+        { id: "C", text: "सुगंधित चंदन से" },
+        { id: "D", text: "अमृत जल से" },
+      ],
+      ans: "B",
+      steps: [
+        "गोपियाँ उद्धव के निर्गुण ब्रह्म और योग साधना के शुष्क उपदेश को सुनकर कहती हैं: 'सुनत जोग लागत है ऐसो, ज्यों करुई ककरी'।",
+        "अर्थात् योग संदेश उन्हें कड़वी ककड़ी के समान अरुचिकर और अग्राह्य लगता है।",
+        "गोपियों का श्रीकृष्ण के प्रति अनन्य प्रेम सगुण भक्ति पर आधारित है।",
+      ],
+      explanation: "गोपियों ने उद्धव के योग संदेश को 'कड़वी ककड़ी' (करुई ककरी) के समान निरर्थक और अरुचिकर बताया है।",
+      topicName: "सूरदास – पद (क्षितिज भाग-2)",
+      source: "सीबीएसई कक्षा 10 हिंदी (कोर्स ए) बोर्ड प्रश्न बैंक",
+    },
+    {
+      q: "मुंशी प्रेमचंद की प्रसिद्ध कहानी 'दो बैलों की कथा' में दोनों बैलों (हीरा और मोती) के माध्यम से किस मानवीय मूल्य को प्रमुखता से दर्शाया गया है?",
+      options: [
+        { id: "A", text: "धन संग्रह और व्यापारिक लाभ" },
+        { id: "B", text: "स्वतंत्रता का महत्व और सच्ची मित्रता" },
+        { id: "C", text: "शारीरिक बल और अहंकार" },
+        { id: "D", text: "विदेशी संस्कृति का अंधानुकरण" },
+      ],
+      ans: "B",
+      steps: [
+        "प्रेमचंद ने हीरा और मोती के आपसी प्रेम, त्याग और अत्याचार के विरुद्ध संघर्ष को रेखांकित किया है।",
+        "कहानी यह संदेश देती है कि स्वतंत्रता सरलता से नहीं मिलती, उसके लिए निरंतर संघर्ष करना पड़ता है।",
+      ],
+      explanation: "'दो बैलों की कथा' स्वतंत्रता संग्राम के प्रतीकात्मक संदर्भ में सच्ची मित्रता और स्वाभिमान का अमर संदेश देती है।",
+      topicName: "दो बैलों की कथा (क्षितिज भाग-1)",
+      source: "सीबीएसई कक्षा 9 हिंदी (कोर्स ए) पाठ्यपुस्तक क्षितिज",
+    },
+  ],
 };
 
 export async function POST(req: Request) {
@@ -243,6 +318,10 @@ export async function POST(req: Request) {
           ? "chemistry"
           : sub.id.toLowerCase().includes("bio")
           ? "biology"
+          : sub.id.toLowerCase().includes("eng")
+          ? "english"
+          : sub.id.toLowerCase().includes("hin")
+          ? "hindi"
           : sub.id.toLowerCase().includes("sst") || sub.id.toLowerCase().includes("gs") || sub.id.toLowerCase().includes("pol")
           ? "sst"
           : "maths";

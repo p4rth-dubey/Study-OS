@@ -13,6 +13,8 @@ const NAMES: Record<string, string> = {
   science: "Science",
   maths: "Mathematics",
   sst: "Social Science",
+  english: "English",
+  hindi: "Hindi",
 };
 
 interface OfficialResourceLink {
