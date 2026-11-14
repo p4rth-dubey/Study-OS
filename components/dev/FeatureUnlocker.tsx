@@ -3,6 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { devFetch } from "../../lib/dev/client";
 import type { FeatureFlag, FeatureFlagKey } from "../../lib/dev/types";
 
 export default function FeatureUnlocker() {
@@ -12,7 +13,7 @@ export default function FeatureUnlocker() {
 
   const fetchFlags = async () => {
     try {
-      const res = await fetch("/api/dev/flags");
+      const res = await devFetch("/api/dev/flags");
       const data = await res.json();
       if (data.flags) setFlags(data.flags);
     } catch (err) {
@@ -29,7 +30,7 @@ export default function FeatureUnlocker() {
   const toggleFlag = async (key: FeatureFlagKey, currentState: boolean) => {
     setUpdatingKey(key);
     try {
-      const res = await fetch("/api/dev/flags", {
+      const res = await devFetch("/api/dev/flags", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key, enabled: !currentState }),

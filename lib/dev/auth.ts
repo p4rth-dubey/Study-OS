@@ -3,30 +3,35 @@
  * Supports Supabase session matching, environment-based developer IDs, and
  * fallback authorization for local engineering environments. */
 
-import { NextRequest } from "next/server";
-import { createServerSupabaseClient } from "../supabase/server";
-import { recordAuditLog } from "./audit";
+import type { NextRequest } from "next/server";
 import type { DeveloperSession } from "./types";
 
-const FOUNDER_EMAIL = "parthveerdubey6167@gmail.com";
+const FOUNDER_EMAIL = "parthveerdubey6167@gmail.com , anshgamerz1212@gmail.com";
 const FOUNDER_DEVELOPER_ID = "p4rth";
 
-// Master developer key from the server environment (never exposed to the
-// browser). It is intentionally optional: Google/Supabase sign-in with an
-// authorized email remains sufficient, while the manual key gate is disabled
-// until a key is explicitly configured.
+// Master developer key from the server environment (never exposed to the browser).
 const MASTER_DEV_KEY = process.env.STUDYOS_DEV_KEY;
 
 // Configured developer IDs or emails from environment
-const AUTHORIZED_DEVELOPER_EMAILS = (process.env.DEVELOPER_EMAILS || FOUNDER_EMAIL)
+const rawEnvEmails = process.env.DEVELOPER_EMAILS || "";
+export const AUTHORIZED_DEVELOPER_EMAILS = Array.from(
+  new Set(
+    [...rawEnvEmails.split(","), FOUNDER_EMAIL]
+      .map((e) => e.replace(/^["']|["']$/g, "").trim().toLowerCase())
+      .filter(Boolean)
+  )
+);
+
+export const AUTHORIZED_DEVELOPER_IDS = (process.env.DEVELOPER_ACCOUNT_IDS || "")
   .split(",")
-  .map((e) => e.trim().toLowerCase())
+  .map((id) => id.replace(/^["']|["']$/g, "").trim())
   .filter(Boolean);
 
-const AUTHORIZED_DEVELOPER_IDS = (process.env.DEVELOPER_ACCOUNT_IDS || "")
-  .split(",")
-  .map((id) => id.trim())
-  .filter(Boolean);
+/** Helper to check whether an email is registered as an authorized developer. */
+export function isAuthorizedDeveloperEmail(email?: string | null): boolean {
+  if (!email) return false;
+  return AUTHORIZED_DEVELOPER_EMAILS.includes(email.trim().toLowerCase());
+}
 
 /** Verifies whether an incoming server request or context is from an authorized developer. */
 export async function verifyDeveloperAccess(
@@ -34,7 +39,7 @@ export async function verifyDeveloperAccess(
 ): Promise<DeveloperSession> {
   const timestamp = new Date().toISOString();
 
-  // 1. Check HTTP Header authorization (for CLI / script / secret token)
+  // 1. Check HTTP Header authorization (for CLI / script / secret master key)
   if (req) {
     const headerKey = req.headers.get("x-studyos-dev-key");
     const authHeader = req.headers.get("authorization");
@@ -44,7 +49,10 @@ export async function verifyDeveloperAccess(
       (MASTER_DEV_KEY && headerKey === MASTER_DEV_KEY) ||
       (MASTER_DEV_KEY && bearerToken === MASTER_DEV_KEY)
     ) {
-      recordAuditLog("dev_master_key", "FOUNDER", "DEV_AUTH_SUCCESS", "x-studyos-dev-key", "success");
+      try {
+        const { recordAuditLog } = await import("./audit");
+        recordAuditLog("dev_master_key", "FOUNDER", "DEV_AUTH_SUCCESS", "x-studyos-dev-key", "success");
+      } catch {}
       return {
         authorized: true,
         role: "FOUNDER",
@@ -63,7 +71,7 @@ export async function verifyDeveloperAccess(
         authorized: true,
         role: "FOUNDER",
         developerId: "dev_founder_cookie",
-        email: "parthveerdubey6167@gmail.com",
+        email: FOUNDER_EMAIL,
         name: "StudyOS Founder",
         method: "master_key",
         timestamp,
@@ -71,37 +79,59 @@ export async function verifyDeveloperAccess(
     }
   }
 
-  // 2. Check Supabase Server Session
+  // 2. Check Supabase Server Session (via cookies or Bearer access token)
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+    const authHeader = req?.headers.get("authorization");
+    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
 
-    if (!error && user) {
-      const email = user.email?.toLowerCase();
+    const { createServerSupabaseClient } = await import("../supabase/server");
+    const supabase = await createServerSupabaseClient();
+
+    let user = null;
+
+    // Verify JWT bearer token if present
+    if (bearerToken && bearerToken !== MASTER_DEV_KEY) {
+      const { data, error } = await supabase.auth.getUser(bearerToken);
+      if (!error && data?.user) {
+        user = data.user;
+      }
+    }
+
+    // Fall back to server cookie session
+    if (!user) {
+      const { data, error } = await supabase.auth.getUser();
+      if (!error && data?.user) {
+        user = data.user;
+      }
+    }
+
+    if (user) {
+      const email = user.email?.trim().toLowerCase();
       const userId = user.id;
 
       const isListedEmail = email && AUTHORIZED_DEVELOPER_EMAILS.includes(email);
       const isListedId = AUTHORIZED_DEVELOPER_IDS.includes(userId);
-      const isAppMetadataAdmin = user.app_metadata?.role === "developer" || user.app_metadata?.role === "founder";
+      const isAppMetadataAdmin =
+        user.app_metadata?.role === "developer" || user.app_metadata?.role === "founder";
 
       if (isListedEmail || isListedId || isAppMetadataAdmin) {
-        recordAuditLog(
-          email || userId,
-          "FOUNDER",
-          "DEV_AUTH_SUCCESS",
-          "supabase_session",
-          "success",
-          { userId, email }
-        );
+        try {
+          const { recordAuditLog } = await import("./audit");
+          recordAuditLog(
+            email || userId,
+            "FOUNDER",
+            "DEV_AUTH_SUCCESS",
+            "supabase_session",
+            "success",
+            { userId, email }
+          );
+        } catch {}
         return {
           authorized: true,
           role: "FOUNDER",
           developerId: userId,
           email: user.email,
-          name: (user.user_metadata?.full_name as string) || "Founder",
+          name: (user.user_metadata?.full_name as string) || (user.user_metadata?.name as string) || "Founder",
           method: "supabase_session",
           timestamp,
         };
@@ -111,37 +141,25 @@ export async function verifyDeveloperAccess(
     // Supabase auth service unavailable or not configured in current environment
   }
 
-  // 3. Local Development Mode Failover
-  // In pure local dev mode (NODE_ENV !== "production"), allow developer access
-  // so the author can build and test God Mode without mandatory cloud OAuth.
-  const isDev = process.env.NODE_ENV !== "production";
-  if (isDev) {
-    return {
-      authorized: true,
-      role: "FOUNDER",
-      developerId: "dev_local_architect",
-      email: "architect@local.studyos",
-      name: "Local Founder / Architect",
-      method: "local_dev",
-      timestamp,
-    };
-  }
-
-  // Access denied
+  // Access denied — strictly enforced for everyone, including in development mode.
+  // Never grant developer superpowers without verified identity or master key.
   if (req) {
-    recordAuditLog(
-      "anonymous",
-      "GUEST",
-      "DEV_AUTH_DENIED",
-      req.nextUrl.pathname,
-      "denied",
-      { ip: req.headers.get("x-forwarded-for") || "unknown" }
-    );
+    try {
+      const { recordAuditLog } = await import("./audit");
+      recordAuditLog(
+        "anonymous",
+        "GUEST",
+        "DEV_AUTH_DENIED",
+        req.nextUrl?.pathname || "/developer",
+        "denied",
+        { ip: req.headers.get("x-forwarded-for") || "unknown" }
+      );
+    } catch {}
   }
 
   return {
     authorized: false,
-    method: "local_dev",
+    method: "supabase_session",
     timestamp,
   };
 }

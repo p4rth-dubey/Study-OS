@@ -3,6 +3,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { devFetch } from "../../lib/dev/client";
 import type { SystemMetrics } from "../../lib/dev/types";
 
 export default function DeveloperDashboardOverview({
@@ -15,7 +16,7 @@ export default function DeveloperDashboardOverview({
 
   const fetchMetrics = async () => {
     try {
-      const res = await fetch("/api/dev/system");
+      const res = await devFetch("/api/dev/system");
       if (res.ok) {
         const data = await res.json();
         setMetrics(data);

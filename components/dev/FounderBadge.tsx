@@ -1,17 +1,27 @@
 /** Founder Profile Badge & Developer HUD Indicator.
  * Displays an exclusive cybernetic badge indicating God Mode is active.
+ * Renders ONLY for verified developer accounts.
  * Click opens or navigates to /developer. */
 "use client";
 
 import Link from "next/link";
+import { useIsDeveloper } from "../../lib/auth/helpers";
 
 export default function FounderBadge({
   small = false,
   showLink = true,
+  forceShow = false,
 }: {
   small?: boolean;
   showLink?: boolean;
+  forceShow?: boolean;
 }) {
+  const { isDeveloper, loading } = useIsDeveloper();
+
+  if (!forceShow && (loading || !isDeveloper)) {
+    return null;
+  }
+
   const badgeContent = (
     <div
       className={`group relative inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/40 bg-[#150d2a]/90 backdrop-blur-md transition-all duration-300 hover:border-[#a855f7] hover:shadow-[0_0_20px_rgba(168,85,247,0.35)] ${

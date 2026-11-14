@@ -4,6 +4,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { devFetch } from "../../lib/dev/client";
 import type { AuditLogEntry } from "../../lib/dev/types";
 
 export default function DeveloperActivityLogs() {
@@ -13,7 +14,7 @@ export default function DeveloperActivityLogs() {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch(`/api/dev/audit?status=${filterStatus}`);
+      const res = await devFetch(`/api/dev/audit?status=${filterStatus}`);
       const data = await res.json();
       if (data.logs) setLogs(data.logs);
     } catch (err) {
@@ -30,7 +31,7 @@ export default function DeveloperActivityLogs() {
   const handleClear = async () => {
     if (!confirm("Are you sure you want to purge the current audit memory buffer?")) return;
     try {
-      await fetch("/api/dev/audit", { method: "DELETE" });
+      await devFetch("/api/dev/audit", { method: "DELETE" });
       fetchLogs();
     } catch (err) {
       console.error("Failed to clear logs:", err);

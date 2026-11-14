@@ -246,5 +246,20 @@ test("Stage keys are customized per stream", () => {
   assert.deepStrictEqual(cbse9Stages, ["theory", "ncert", "revision"]);
 });
 
+import { isAuthorizedDeveloperEmail, verifyDeveloperAccess } from "../lib/dev/auth.ts";
+
+// 8. Developer Mode Security & Access Control
+test("Developer mode strictly permits only configured developer emails and blocks everyone else", async () => {
+  assert.strictEqual(isAuthorizedDeveloperEmail("parthveerdubey6167@gmail.com"), true, "Founder email must be authorized");
+  assert.strictEqual(isAuthorizedDeveloperEmail("PARTHVEERDUBEY6167@GMAIL.COM"), true, "Case-insensitive authorization");
+  assert.strictEqual(isAuthorizedDeveloperEmail("student@gmail.com"), false, "Student email must be rejected");
+  assert.strictEqual(isAuthorizedDeveloperEmail("other@school.edu"), false, "Unauthorized email must be rejected");
+  assert.strictEqual(isAuthorizedDeveloperEmail(""), false, "Empty email must be rejected");
+  assert.strictEqual(isAuthorizedDeveloperEmail(null), false, "Null email must be rejected");
+
+  const session = await verifyDeveloperAccess();
+  assert.strictEqual(session.authorized, false, "Anonymous/unauthenticated context must be denied developer access");
+});
+
 console.log(`\n==== Test Results: ${passed} passed, ${failed} failed ====`);
 if (failed > 0) process.exit(1);

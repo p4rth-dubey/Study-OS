@@ -3,6 +3,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { devFetch } from "../../lib/dev/client";
 
 const AUTOCOMPLETE_LIST = [
   "dev.help",
@@ -65,7 +66,7 @@ export default function DeveloperConsole() {
     setIsExecuting(true);
 
     try {
-      const res = await fetch("/api/dev/console", {
+      const res = await devFetch("/api/dev/console", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ command: trimmed }),

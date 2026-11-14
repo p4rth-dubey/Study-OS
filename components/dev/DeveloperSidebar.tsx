@@ -58,7 +58,7 @@ export default function DeveloperSidebar({
       {/* Founder Status Pill */}
       <div className="border-b border-[#2d164d]/40 p-4">
         <div className="flex items-center justify-between rounded-xl border border-[#4c1d95]/40 bg-[#160b2b]/60 p-3">
-          <FounderBadge small showLink={false} />
+          <FounderBadge small showLink={false} forceShow={true} />
           <span className="font-mono text-[10px] text-[#a78bfa]">ROOT ACCESS</span>
         </div>
       </div>

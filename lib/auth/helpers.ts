@@ -118,3 +118,65 @@ export function useAuthUser() {
 
   return { user, loading };
 }
+
+/** React hook — checks server-side developer authorization for the current user.
+ * Returns { isDeveloper, loading }. */
+export function useIsDeveloper() {
+  const { user, loading: userLoading } = useAuthUser();
+  const [isDeveloper, setIsDeveloper] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    async function check() {
+      if (userLoading) return;
+      if (!user) {
+        setIsDeveloper(false);
+        setChecking(false);
+        return;
+      }
+
+      try {
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        const token = session?.access_token;
+
+        const headers: HeadersInit = {};
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const res = await fetch("/api/dev/auth", {
+          headers,
+          credentials: "include",
+        });
+
+        if (active) {
+          if (res.ok) {
+            const data = await res.json();
+            setIsDeveloper(Boolean(data.authorized));
+          } else {
+            setIsDeveloper(false);
+          }
+          setChecking(false);
+        }
+      } catch {
+        if (active) {
+          setIsDeveloper(false);
+          setChecking(false);
+        }
+      }
+    }
+
+    check();
+
+    return () => {
+      active = false;
+    };
+  }, [user, userLoading]);
+
+  return { isDeveloper, loading: userLoading || checking };
+}

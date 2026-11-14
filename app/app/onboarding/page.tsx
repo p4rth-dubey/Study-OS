@@ -30,7 +30,7 @@ import ChapterPreparationSelector, {
   getPreparationStatus,
   type PreparationStatus,
 } from "../../../components/chapter-preparation-selector";
-import { SmoothScroll, reducedMotion } from "../../../lib/motion";
+import { reducedMotion } from "../../../lib/motion";
 import { celebrate } from "../../../lib/celebrate";
 import { BrandMark } from "../../../components/site-header";
 import { useAuthUser, signInWithGoogle, signOut } from "../../../lib/auth/helpers";
@@ -304,8 +304,7 @@ export default function OnboardingPage() {
   );
 
   return (
-    <SmoothScroll>
-      <section className="relative">
+    <section className="relative">
         <div
           aria-hidden
           className="pointer-events-none absolute top-[-180px] left-1/2 h-[380px] w-[720px] max-w-full -translate-x-1/2 rounded-full opacity-25 blur-[130px]"
@@ -623,7 +622,12 @@ export default function OnboardingPage() {
                           <p className="flex items-center gap-2 text-[12px] text-[#aaa]"><span className="h-2 w-2 rounded-full bg-[#f59e0b]" /> Partially prepared — keep building</p>
                           <p className="flex items-center gap-2 text-[12px] text-[#aaa]"><span className="h-2 w-2 rounded-full bg-[#22c55e]" /> Completed — credit your work</p>
                         </div>
-                        <div className="mt-4 max-h-[46dvh] overflow-y-auto pr-1">
+                        <div
+                          data-lenis-prevent="true"
+                          className="mt-4 max-h-[60vh] sm:max-h-[68vh] overflow-y-auto overscroll-contain touch-pan-y pr-1.5 focus:outline-none"
+                          tabIndex={0}
+                          style={{ WebkitOverflowScrolling: "touch" }}
+                        >
                           <ChapterPreparationSelector
                             grade={grade}
                             targetExam={targetExam}
@@ -668,7 +672,12 @@ export default function OnboardingPage() {
                             <p className="text-[12px] text-[#65b982]">chapters credited</p>
                           </div>
                         </div>
-                        <div className="mt-4 max-h-[32dvh] space-y-3 overflow-y-auto pr-1">
+                        <div
+                          data-lenis-prevent="true"
+                          className="mt-4 max-h-[48vh] sm:max-h-[55vh] space-y-3 overflow-y-auto overscroll-contain touch-pan-y pr-1.5 focus:outline-none"
+                          tabIndex={0}
+                          style={{ WebkitOverflowScrolling: "touch" }}
+                        >
                           {currentSubjects.map((s) => {
                             const rows = s.groups.flatMap((g) =>
                               g.chapters
@@ -729,6 +738,5 @@ export default function OnboardingPage() {
           </div>
         </div>
       </section>
-    </SmoothScroll>
-  );
+    );
 }
