@@ -254,6 +254,8 @@ test("Developer mode strictly permits only configured developer emails and block
   assert.strictEqual(isAuthorizedDeveloperEmail("PARTHVEERDUBEY6167@GMAIL.COM"), true, "Case-insensitive authorization");
   assert.strictEqual(isAuthorizedDeveloperEmail("anshgamerz1212@gmail.com"), true, "Ansh developer email must be authorized");
   assert.strictEqual(isAuthorizedDeveloperEmail("ANSHGAMERZ1212@GMAIL.COM"), true, "Case-insensitive Ansh developer email");
+  assert.strictEqual(isAuthorizedDeveloperEmail("atharvaagale71@gmail.com"), true, "Atharva developer email must be authorized");
+  assert.strictEqual(isAuthorizedDeveloperEmail("ATHARVAGALE71@GMAIL.COM"), true, "Case-insensitive Atharva developer email");
   assert.strictEqual(isAuthorizedDeveloperEmail("student@gmail.com"), false, "Student email must be rejected");
   assert.strictEqual(isAuthorizedDeveloperEmail("other@school.edu"), false, "Unauthorized email must be rejected");
   assert.strictEqual(isAuthorizedDeveloperEmail(""), false, "Empty email must be rejected");

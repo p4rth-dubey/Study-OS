@@ -9,6 +9,7 @@ import type { DeveloperSession } from "./types";
 const DEFAULT_DEVELOPER_EMAILS = [
   "parthveerdubey6167@gmail.com",
   "anshgamerz1212@gmail.com",
+  "atharvaagale71@gmail.com"
 ];
 const FOUNDER_EMAIL = "parthveerdubey6167@gmail.com";
 const FOUNDER_DEVELOPER_ID = "p4rth";
