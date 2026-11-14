@@ -6,7 +6,11 @@
 import type { NextRequest } from "next/server";
 import type { DeveloperSession } from "./types";
 
-const FOUNDER_EMAIL = "parthveerdubey6167@gmail.com , anshgamerz1212@gmail.com";
+const DEFAULT_DEVELOPER_EMAILS = [
+  "parthveerdubey6167@gmail.com",
+  "anshgamerz1212@gmail.com",
+];
+const FOUNDER_EMAIL = "parthveerdubey6167@gmail.com";
 const FOUNDER_DEVELOPER_ID = "p4rth";
 
 // Master developer key from the server environment (never exposed to the browser).
@@ -16,7 +20,11 @@ const MASTER_DEV_KEY = process.env.STUDYOS_DEV_KEY;
 const rawEnvEmails = process.env.DEVELOPER_EMAILS || "";
 export const AUTHORIZED_DEVELOPER_EMAILS = Array.from(
   new Set(
-    [...rawEnvEmails.split(","), FOUNDER_EMAIL]
+    [
+      ...rawEnvEmails.split(","),
+      ...DEFAULT_DEVELOPER_EMAILS,
+      ...FOUNDER_EMAIL.split(","),
+    ]
       .map((e) => e.replace(/^["']|["']$/g, "").trim().toLowerCase())
       .filter(Boolean)
   )
